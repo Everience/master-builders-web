@@ -1,0 +1,88 @@
+.main {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-top: 40px;
+  .form-container {
+    width: 60%;
+  }
+}
+.project-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0 auto;
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #007acc;
+    }
+
+    input,
+    select,
+    textarea {
+      padding: 0.7rem;
+      border: none;
+      background-color: #eeeeee;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+  }
+
+  .file-list {
+    margin-top: 0.5rem;
+    list-style: none;
+    padding: 0;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.4rem 0.6rem;
+      margin-bottom: 0.3rem;
+
+      button {
+        background: transparent;
+        border: none;
+        color: #d00;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+    }
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    button[type="submit"] {
+      margin-top: 30px;
+      margin-bottom: 30px;
+      width: 300px;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+
+      &:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

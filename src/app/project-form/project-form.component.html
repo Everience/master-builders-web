@@ -1,0 +1,76 @@
+<div class="main">
+  <div class="form-container">
+
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+      <div class="form-group">
+        <label>Project Code</label>
+        <input type="text" formControlName="projectCode" />
+      </div>
+
+      <div class="form-group">
+        <label>Project Name</label>
+        <input type="text" formControlName="projectName" />
+      </div>
+
+      <div class="form-group">
+        <label>Region</label>
+        <select formControlName="region">
+          <option value="">Select region</option>
+          <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Market Segment</label>
+        <select formControlName="marketSegment">
+          <option value="">Select segment</option>
+          <option *ngFor="let segment of marketSegments" [value]="segment">{{ segment }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Innovation Area</label>
+        <select formControlName="innovationArea">
+          <option value="">Select area</option>
+          <option *ngFor="let area of innovationAreas" [value]="area">{{ area }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Project Phase</label>
+        <select formControlName="projectPhase">
+          <option value="">Select phase</option>
+          <option *ngFor="let phase of projectPhases" [value]="phase">{{ phase }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Project Status</label>
+        <select formControlName="projectStatus">
+          <option value="">Select status</option>
+          <option *ngFor="let status of projectStatuses" [value]="status">{{ status }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea formControlName="notes" rows="3"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Attachments <br> You can upload a maximum of 10files, up to 10MB each</label>
+        <input type="file" multiple (change)="onFileSelected($event)" />
+        <ul class="file-list" *ngIf="uploadedFiles.length">
+          <li *ngFor="let file of uploadedFiles; let i = index">
+            {{ file.name }}
+            <button type="button" (click)="removeFile(i)">Remove</button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="button-container">
+        <button type="submit" [disabled]="projectForm.invalid">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>

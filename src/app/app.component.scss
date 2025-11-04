@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .content {
+    width: 80%;
+  }
+  .header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    button {
+      border: none;
+      color: #fff;
+      background-color: #004a96;
+      padding: 15px 39px;
+      font-size: 14px;
+      border-radius: 7px;
+    }
+  }
+}
