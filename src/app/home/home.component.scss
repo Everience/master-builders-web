@@ -1,0 +1,27 @@
+.home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  button {
+    img {
+      width: 70px;
+      margin-bottom: 10px;
+    }
+    background-color: #004a96;
+    border: 3px solid #fff;
+    border-radius: 10px;
+    color: #fff;
+    width: 220px;
+    padding: 30px 5px;
+    margin-right: 10px;
+    font-size: 18px;
+  }
+  button:hover {
+    background-color: #013971;
+    cursor: pointer;
+  }
+}
+.forms-container {
+  margin-top: 40px;
+}

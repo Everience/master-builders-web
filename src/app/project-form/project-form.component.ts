@@ -18,11 +18,18 @@ export class ProjectFormComponent {
   projectForm: FormGroup;
   uploadedFiles: File[] = [];
 
-  regions = ['Europe', 'Americas', 'Asia', 'Africa'];
-  marketSegments = ['Enterprise', 'SMB', 'Consumer'];
-  innovationAreas = ['AI', 'Cloud', 'IoT', 'Blockchain'];
-  projectPhases = ['Initiation', 'Planning', 'Execution', 'Closure'];
-  projectStatuses = ['Active', 'On Hold', 'Completed'];
+  regions = ['AMET', 'ANZ', 'EU', 'GLOBAL', 'BA', 'SA'];
+  marketSegments = ['AS', 'CA', 'CS', 'FIBERS', 'UGC', 'VTG'];
+  innovationAreas = [
+    'Advanced rheology',
+    'Stength development',
+    'Durability',
+    'Sustainability',
+    'Cost efficiency',
+    'Growth',
+  ];
+  projectPhases = ['Business Case', 'Lab Phase', 'Pilot Phase', 'Launch Phase'];
+  projectStatuses = ['In Progress', 'On Hold', 'Completed'];
 
   constructor(private fb: FormBuilder) {
     this.projectForm = this.fb.group({

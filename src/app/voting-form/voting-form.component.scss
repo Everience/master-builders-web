@@ -22,7 +22,7 @@
     }
   }
 }
-.project-form {
+.voting-form {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -34,10 +34,14 @@
     margin-bottom: 1rem;
 
     label {
-      font-size: 0.9rem;
+      font-size: 14px;
       font-weight: 600;
       margin-bottom: 0.4rem;
       color: #007acc;
+      /*&:after {
+        content: " *";
+        color: #007acc;
+      }*/
     }
 
     input,

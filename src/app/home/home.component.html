@@ -1,0 +1,26 @@
+@if(!projectFormIsVisible && !votingFormIsVisible){
+<div class="home">
+  <button (click)="showProjectForm()">
+    <img src="../../assets/inventory.png" alt="">
+    <div>
+      Create Project
+    </div>
+  </button>
+  <button (click)="showVotingForm()">
+    <img src="../../assets/product-review.png" alt="">
+    <div>
+      Voting Form
+    </div>
+  </button>
+</div>
+}
+@if(projectFormIsVisible){
+<div class="forms-container">
+  <button (click)="restoreVariables()">Back</button>
+  <app-project-form></app-project-form>
+</div>
+}
+@if(votingFormIsVisible){
+<button (click)="restoreVariables()">Back</button>
+<app-voting-form></app-voting-form>
+}

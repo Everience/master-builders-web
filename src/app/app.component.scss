@@ -7,16 +7,16 @@
   }
   .header {
     width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    button {
-      border: none;
-      color: #fff;
-      background-color: #004a96;
-      padding: 15px 39px;
-      font-size: 14px;
-      border-radius: 7px;
+    @media screen and (max-width: 900px) {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    @media screen and (min-width: 901px) {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
     }
   }
 }

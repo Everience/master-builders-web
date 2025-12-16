@@ -1,0 +1,84 @@
+<div class="main">
+  <div class="form-container">
+
+    <form [formGroup]="votingForm" (ngSubmit)="onSubmit()" class="voting-form">
+      <div class="form-group">
+        <label>Team / Department*</label>
+        <select formControlName="team">
+          <option value="">Select region</option>
+          <option *ngFor="let team of teams" [value]="team">{{ team }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Project Name*</label>
+        <input type="text" formControlName="projectName" />
+      </div>
+
+      <div class="form-group">
+        <label>Project Status*</label>
+        <select formControlName="projectStatus">
+          <option value="">Select status</option>
+          <option *ngFor="let status of projectStatuses" [value]="status">{{ status }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Innovation Area*</label>
+        <select formControlName="innovationArea">
+          <option value="">Select area</option>
+          <option *ngFor="let area of innovationAreas" [value]="area">{{ area }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Region*</label>
+        <select formControlName="region">
+          <option value="">Select region</option>
+          <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Market Segment*</label>
+        <select formControlName="marketSegment">
+          <option value="">Select segment</option>
+          <option *ngFor="let segment of marketSegments" [value]="segment">{{ segment }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Project Documentation*</label>
+        <textarea formControlName="projectDocs" rows="3" placeholder="E.g.: Link to Sharepoint"
+          style="height: 30px;"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea formControlName="notes" rows="3"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Score*<br>
+          <span style="font-size: 0.75rem;">Rate from 1 (low) to 5 (high)</span><br>
+          <span style="font-size: 0.75rem;">- Sales & Marketing voters: market potential</span><br>
+          <span style="font-size: 0.75rem;">- Technical voters: technical probability of success</span>
+        </label>
+        <select formControlName="score">
+          <option value="">Select score</option>
+          <option *ngFor="let score of scores" [value]="score">{{ score }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Reasoning fot the score*</label>
+        <textarea formControlName="scoreReason" rows="3"
+          style="border-bottom: 2px solid #007acc; border-radius: 6px 6px 0 0;"></textarea>
+      </div>
+
+      <div class="button-container">
+        <button type="submit" [disabled]="votingForm.invalid">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
