@@ -12,6 +12,12 @@
       Voting Form
     </div>
   </button>
+  <button (click)="showBI()">
+    <img src="../../assets/product-review.png" alt="">
+    <div>
+      Power BI Testing
+    </div>
+  </button>
 </div>
 }
 @if(projectFormIsVisible){
@@ -23,4 +29,8 @@
 @if(votingFormIsVisible){
 <button (click)="restoreVariables()">Back</button>
 <app-voting-form></app-voting-form>
+}
+@if(BIVisible){
+  <button (click)="restoreVariables()">Back</button>
+  <app-bi-test></app-bi-test>
 }
