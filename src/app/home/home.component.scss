@@ -1,8 +1,9 @@
 .home {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 80px;
   button {
     img {
       width: 70px;
@@ -16,12 +17,22 @@
     padding: 30px 5px;
     margin-right: 10px;
     font-size: 18px;
-  }
-  button:hover {
-    background-color: #013971;
-    cursor: pointer;
+    &:hover {
+      background-color: #013971;
+      cursor: pointer;
+    }
   }
 }
-.forms-container {
-  margin-top: 40px;
-}
+
+.back-button{
+  border: none;
+  background-color: #ea992e;
+  color: #fff;
+  border-radius: 3px; 
+  padding: 5px 12px;
+  margin-top: 30px;
+  cursor: pointer;
+  &:hover{
+  background-color: #c67f22;
+  }
+} 

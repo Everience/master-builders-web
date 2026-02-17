@@ -1,18 +1,22 @@
+.switch-btn {
+    border: none;
+    color: #fff;
+    background-color: #004a96;
+    padding: 5px 12px;
+    font-size: 13px;
+    border-radius: 3px;
+    margin-top: 30px;
+    margin-left: 5px;
+  &:hover {
+      background-color: #003972;
+      cursor: pointer;
+    }
+}
 .main {
   width: 100%;
   display: flex;
   justify-content: flex-start;
   margin-top: 40px;
-  .switch-btn {
-    button {
-      border: none;
-      color: #fff;
-      background-color: #004a96;
-      padding: 15px 39px;
-      font-size: 14px;
-      border-radius: 7px;
-    }
-  }
   .form-container {
     @media screen and (max-width: 900px) {
       width: 100%;

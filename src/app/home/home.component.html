@@ -7,7 +7,7 @@
     </div>
   </button>
   <button (click)="showVotingForm()">
-    <img src="../../assets/product-review.png" alt="">
+    <img src="../../assets/checklist.png" alt="">
     <div>
       Voting Form
     </div>
@@ -22,15 +22,15 @@
 }
 @if(projectFormIsVisible){
 <div class="forms-container">
-  <button (click)="restoreVariables()">Back</button>
+  <button (click)="restoreVariables()" class="back-button"><</button>
   <app-project-form></app-project-form>
 </div>
 }
 @if(votingFormIsVisible){
-<button (click)="restoreVariables()">Back</button>
+<button (click)="restoreVariables()" class="back-button"><</button>
 <app-voting-form></app-voting-form>
 }
 @if(BIVisible){
-  <button (click)="restoreVariables()">Back</button>
+  <button (click)="restoreVariables()" class="back-button"><</button>
   <app-bi-test></app-bi-test>
 }
