@@ -6,6 +6,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-project-form',
@@ -31,7 +32,7 @@ export class ProjectFormComponent {
   projectPhases = ['Business Case', 'Lab Phase', 'Pilot Phase', 'Launch Phase'];
   projectStatuses = ['In Progress', 'On Hold', 'Completed'];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private router: Router) {
     this.projectForm = this.fb.group({
       projectCode: ['', Validators.required],
       projectName: ['', Validators.required],
@@ -43,6 +44,10 @@ export class ProjectFormComponent {
       notes: [''],
       attachments: [null],
     });
+  }
+
+  goBack() {
+    this.router.navigate(['/home']);
   }
 
   onFileSelected(event: any) {

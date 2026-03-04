@@ -1,36 +1,34 @@
-@if(!projectFormIsVisible && !votingFormIsVisible && !BIVisible){
-<div class="home">
-  <button (click)="showProjectForm()">
-    <img src="../../assets/inventory.png" alt="">
-    <div>
-      Create Project
-    </div>
-  </button>
-  <button (click)="showVotingForm()">
-    <img src="../../assets/checklist.png" alt="">
-    <div>
-      Voting Form
-    </div>
-  </button>
-  <button (click)="showBI()">
-    <img src="../../assets/bar-graph.png" alt="">
-    <div>
-      Power BI Testing
-    </div>
-  </button>
+
+<div class="cards">
+
+  <a class="card" href="/project-form">
+    <div class="card-icon"><img src="../../assets/inventory.png" alt=""></div>
+    <div class="card-title">Create Project</div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <a class="card" href="/update-project">
+    <div class="card-icon"><img src="../../assets/software.png" alt=""></div>
+    <div class="card-title">Update Project</div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <a class="card" href="/voting-form">
+    <div class="card-icon"><img src="../../assets/checklist.png" alt=""></div>
+    <div class="card-title">Voting Form</div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <a class="card" href="/update-user-status">
+    <div class="card-icon"><img src="../../assets/update-list.png" alt=""></div>
+    <div class="card-title">Update User Status</div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <a class="card" href="/bi-test">
+    <div class="card-icon"><img src="../../assets/bar-graph.png" alt=""></div>
+    <div class="card-title">Power BI Testing</div>
+    <div class="card-arrow">→</div>
+  </a>
+
 </div>
-}
-@if(projectFormIsVisible){
-<div class="forms-container">
-  <button (click)="restoreVariables()" class="back-button"><</button>
-  <app-project-form></app-project-form>
-</div>
-}
-@if(votingFormIsVisible){
-<button (click)="restoreVariables()" class="back-button"><</button>
-<app-voting-form></app-voting-form>
-}
-@if(BIVisible){
-  <button (click)="restoreVariables()" class="back-button"><</button>
-  <app-bi-test></app-bi-test>
-}

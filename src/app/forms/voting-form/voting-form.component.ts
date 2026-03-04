@@ -6,6 +6,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-voting-form',
@@ -31,6 +32,11 @@ export class VotingFormComponent {
   marketSegments = ['AS', 'CA', 'CS', 'FIBERS', 'UGC', 'VTG'];
   scores = [1, 2, 3, 4, 5];
 
+  goBack() {
+    this.router.navigate(['/home']);
+  }
+
+
   onSubmit() {
     if (this.votingForm.valid) {
       console.log('Form Data:', this.votingForm.value);
@@ -40,7 +46,7 @@ export class VotingFormComponent {
     }
   }
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private router: Router) {
     this.votingForm = this.fb.group({
       team: ['', Validators.required],
       projectName: ['', Validators.required],
