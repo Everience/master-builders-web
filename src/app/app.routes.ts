@@ -1,17 +1,19 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './home/home.component';
-import { ProjectFormComponent } from './forms/create-form/project-form.component';
-import { VotingFormComponent } from './forms/voting-form/voting-form.component';
-import { BiTestComponent } from './bi-test/bi-test.component'; // adjust path if needed
-import { UpdateFormComponent } from './forms/update-project-form/update-form.component';
-import { UpdateUserStatusFormComponent } from './forms/update-user-status-form/update-user-status-form.component';
+import { BiTestComponent } from './bi-test/bi-test.component';
+import { HomeComponent } from './sections/home/home.component';
+import { ProjectFormComponent } from './components/forms/create-form/project-form.component';
+import { UpdateFormComponent } from './components/forms/update-project-form/update-form.component';
+import { VotingFormComponent } from './components/forms/voting-form/voting-form.component';
+import { UpdateUserStatusFormComponent } from './components/forms/update-user-status-form/update-user-status-form.component';
+import { LoginComponent } from './sections/login/login.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
-  { path: 'project-form', component: ProjectFormComponent },
-  { path: 'update-project', component: UpdateFormComponent },
-  { path: 'update-user-status', component: UpdateUserStatusFormComponent },
+  { path: 'create-project', component: ProjectFormComponent },
+  { path: 'update-project-visibility-and-status', component: UpdateFormComponent },
   { path: 'voting-form', component: VotingFormComponent },
+  { path: 'update-user-status', component: UpdateUserStatusFormComponent },
   { path: 'bi-test', component: BiTestComponent },
+  { path: 'login', component: LoginComponent },
 ];

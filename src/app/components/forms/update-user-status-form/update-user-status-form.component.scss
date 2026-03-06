@@ -1,0 +1,129 @@
+.main {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 40px;
+
+    .switch-btn {
+        button {
+            border: none;
+            color: #fff;
+            background-color: #004a96;
+            padding: 15px 39px;
+            font-size: 14px;
+            border-radius: 7px;
+        }
+    }
+
+    .form-container {
+        @media screen and (max-width: 900px) {
+            width: 100%;
+        }
+
+        @media screen and (min-width: 901px) {
+            width: 60%;
+        }
+    }
+}
+
+.voting-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0 auto;
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #007acc;
+            /*&:after {
+        content: " *";
+        color: #007acc;
+      }*/
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 0.7rem;
+            border: none;
+            background-color: #eeeeee;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+    }
+
+    .file-list {
+        margin-top: 0.5rem;
+        list-style: none;
+        padding: 0;
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 0.4rem 0.6rem;
+            margin-bottom: 0.3rem;
+
+            button {
+                background: transparent;
+                border: none;
+                color: #d00;
+                cursor: pointer;
+                font-size: 0.85rem;
+            }
+        }
+    }
+
+    .radio-buttons-container {
+        display: flex;
+        flex-direction: column;
+
+        .radio-label-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 5px;
+
+            label {
+                margin-bottom: 0px;
+                color: #292929;
+                font-weight: 400;
+            }
+        }
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        button[type="submit"] {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            width: 300px;
+            padding: 0.6rem 1rem;
+            font-size: 1rem;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+
+            &:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+        }
+    }
+}

@@ -1,0 +1,413 @@
+// =============================================
+// Master Builders Solutions — Login Page
+// Matches brand: #1B3A6B (navy), #F5A500 (orange)
+// Background: #D8DDE3 (light steel gray)
+// =============================================
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap');
+
+:host {
+    display: block;
+    font-family: 'Barlow', sans-serif;
+}
+
+// ── CSS Variables ──────────────────────────────
+$navy: #1B3A6B;
+$navy-dark: #122850;
+$navy-light: #2a5298;
+$orange: #F5A500;
+$orange-dark: #D98E00;
+$bg: #D8DDE3;
+$bg-card: #FFFFFF;
+$text-muted: #6b7a8d;
+$border: #C5CDD6;
+$error: #c0392b;
+
+// ── Wrapper ────────────────────────────────────
+.login-wrapper {
+    min-height: 100vh;
+    background-color: $bg;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+// ── Background Accents ─────────────────────────
+.bg-accent {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+
+    &--top-right {
+        width: 420px;
+        height: 420px;
+        top: -160px;
+        right: -160px;
+        background: radial-gradient(circle, rgba($navy, 0.08) 0%, transparent 70%);
+    }
+
+    &--bottom-left {
+        width: 340px;
+        height: 340px;
+        bottom: -120px;
+        left: -120px;
+        background: radial-gradient(circle, rgba($orange, 0.10) 0%, transparent 70%);
+    }
+}
+
+// ── Header ─────────────────────────────────────
+.header {
+    padding: 28px 48px;
+    position: relative;
+    z-index: 1;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+
+    &__icon {
+        width: 42px;
+        height: 42px;
+        background-color: $navy;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__chevron {
+        color: $orange;
+        font-size: 22px;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -4px;
+        padding-left: 4px;
+    }
+
+    &__text {
+        line-height: 1;
+    }
+
+    &__brand {
+        display: flex;
+        align-items: flex-start;
+        gap: 1px;
+    }
+
+    &__master {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+        color: $navy;
+        letter-spacing: 0.5px;
+    }
+
+    &__reg {
+        font-size: 9px;
+        color: $navy;
+        font-weight: 700;
+        margin-top: 2px;
+    }
+
+    &__builders {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+        color: $navy;
+        letter-spacing: 0.5px;
+        margin-top: -3px;
+    }
+
+    &__solutions {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: $orange;
+        letter-spacing: 2px;
+        margin-top: -2px;
+    }
+}
+
+// ── Main ───────────────────────────────────────
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 24px 40px;
+    position: relative;
+    z-index: 1;
+}
+
+// ── Login Card ─────────────────────────────────
+.login-card {
+    width: 100%;
+    max-width: 440px;
+    background: $bg-card;
+    border-radius: 16px;
+    box-shadow:
+        0 2px 4px rgba($navy-dark, 0.04),
+        0 8px 24px rgba($navy-dark, 0.10),
+        0 0 0 1px rgba($border, 0.6);
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    &__stripe {
+        width: 5px;
+        flex-shrink: 0;
+        background: linear-gradient(180deg, $navy 0%, $orange 100%);
+    }
+
+    &__inner {
+        flex: 1;
+        padding: 40px 36px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    &__header {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    &__icon-wrap {
+        width: 52px;
+        height: 52px;
+        background: #f5f7fa;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4px;
+        box-shadow: inset 0 0 0 1px rgba($border, 0.8);
+    }
+
+    &__title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 30px;
+        font-weight: 800;
+        color: $navy;
+        margin: 0;
+        letter-spacing: 0.3px;
+    }
+
+    &__subtitle {
+        font-size: 14px;
+        color: $text-muted;
+        margin: 0;
+        line-height: 1.6;
+
+        strong {
+            color: $navy;
+            font-weight: 600;
+        }
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    &__error {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: rgba($error, 0.06);
+        border: 1px solid rgba($error, 0.2);
+        border-radius: 8px;
+        font-size: 13px;
+        color: $error;
+        animation: fadeIn 0.2s ease;
+    }
+
+    &__footer {
+        border-top: 1px solid $border;
+        padding-top: 20px;
+
+        p {
+            font-size: 12px;
+            color: $text-muted;
+            margin: 0;
+            text-align: center;
+            line-height: 1.6;
+
+            a {
+                color: $navy-light;
+                text-decoration: none;
+                font-weight: 500;
+
+                &:hover {
+                    text-decoration: underline;
+                    color: $navy;
+                }
+            }
+        }
+    }
+}
+
+// ── Microsoft Button ───────────────────────────
+.btn-microsoft {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 13px 20px;
+    background-color: $navy;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+    box-shadow: 0 2px 8px rgba($navy-dark, 0.25);
+
+    &__logo {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    &__spinner {
+        display: flex;
+        align-items: center;
+    }
+
+    &__text {
+        letter-spacing: 0.2px;
+    }
+
+    &:hover:not(:disabled) {
+        background-color: $navy-dark;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba($navy-dark, 0.30);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba($navy-dark, 0.20);
+    }
+
+    &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+}
+
+// ── Spinner ────────────────────────────────────
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+// ── Feature Hints ──────────────────────────────
+.features-hint {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+    margin-top: 28px;
+    max-width: 440px;
+    width: 100%;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    span {
+        font-size: 13px;
+        color: $text-muted;
+        font-weight: 500;
+    }
+
+    &__dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: $navy;
+        flex-shrink: 0;
+
+        &--orange {
+            background-color: $orange;
+        }
+    }
+}
+
+// ── Footer ─────────────────────────────────────
+.footer {
+    text-align: center;
+    padding: 20px 24px;
+    position: relative;
+    z-index: 1;
+
+    span {
+        font-size: 12px;
+        color: darken($text-muted, 10%);
+    }
+}
+
+// ── Animations ─────────────────────────────────
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ── Responsive ─────────────────────────────────
+@media (max-width: 480px) {
+    .header {
+        padding: 20px 24px;
+    }
+
+    .login-card__inner {
+        padding: 32px 24px 24px;
+    }
+
+    .login-card__title {
+        font-size: 26px;
+    }
+}
