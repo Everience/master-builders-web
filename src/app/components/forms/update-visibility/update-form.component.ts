@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-update-form',
+  selector: 'app-update-project-visibility-and status',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './update-form.component.html',

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { HomeComponent } from './sections/home/home.component';
 
 @Component({
@@ -11,4 +11,9 @@ import { HomeComponent } from './sections/home/home.component';
 })
 export class AppComponent {
   title = 'mb';
+
+constructor(private router: Router) {}
+  get isDashboard() {
+  return this.router.url.includes('home');
+}
 }

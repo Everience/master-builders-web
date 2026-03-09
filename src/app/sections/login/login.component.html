@@ -1,19 +1,5 @@
 <div class="login-wrapper">
-    <!-- Background geometric accents -->
-    <div class="bg-accent bg-accent--top-right"></div>
-    <div class="bg-accent bg-accent--bottom-left"></div>
-
-    <!-- Header -->
-    <header class="header">
-        <div class="logo">
-            <div class="logo__icon">
-                <span class="logo__chevron">&#187;</span>
-            </div>
-            <div class="logo__text">
-                <img src="../../../assets/logo.png" alt="">
-            </div>
-        </div>
-    </header>
+   
 
     <!-- Login Card -->
     <main class="main">
@@ -21,21 +7,14 @@
             <div class="login-card__inner">
 
                 <div class="login-card__header">
-                    <div class="login-card__icon-wrap">
-                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                            <rect x="2" y="2" width="13" height="13" fill="#F25022" />
-                            <rect x="17" y="2" width="13" height="13" fill="#7FBA00" />
-                            <rect x="2" y="17" width="13" height="13" fill="#00A4EF" />
-                            <rect x="17" y="17" width="13" height="13" fill="#FFB900" />
-                        </svg>
-                    </div>
+                   
                     <h1 class="login-card__title">Welcome back</h1>
                     <p class="login-card__subtitle">Sign in with your Microsoft account to access the <strong>Master
                             Builders Solutions</strong> platform.</p>
                 </div>
 
                 <div class="login-card__body">
-                    <button class="btn-microsoft" (click)="signInWithMicrosoft()" [disabled]="isLoading">
+                    <button class="btn-microsoft">
                         <span class="btn-microsoft__logo" *ngIf="!isLoading">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <rect x="1" y="1" width="8.5" height="8.5" fill="#F25022" />
@@ -72,25 +51,7 @@
             <div class="login-card__stripe"></div>
         </div>
 
-        <!-- Feature grid preview -->
-        <div class="features-hint">
-            <div class="feature-item">
-                <div class="feature-item__dot"></div>
-                <span>Create Projects</span>
-            </div>
-            <div class="feature-item">
-                <div class="feature-item__dot"></div>
-                <span>Update Projects</span>
-            </div>
-            <div class="feature-item">
-                <div class="feature-item__dot feature-item__dot--orange"></div>
-                <span>Voting R&amp;D</span>
-            </div>
-            <div class="feature-item">
-                <div class="feature-item__dot feature-item__dot--orange"></div>
-                <span>Visibility &amp; Status</span>
-            </div>
-        </div>
+        
     </main>
 
 </div>

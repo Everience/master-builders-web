@@ -86,17 +86,15 @@
         }
     }
 
-    .radio-buttons-container {
+    .radio-buttons-container{
         display: flex;
         flex-direction: column;
-
-        .radio-label-container {
+        .radio-label-container{
             display: flex;
             justify-content: flex-start;
             align-items: center;
             margin-bottom: 5px;
-
-            label {
+            label{
                 margin-bottom: 0px;
                 color: #292929;
                 font-weight: 400;

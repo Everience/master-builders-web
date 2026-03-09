@@ -8,10 +8,9 @@
 
 :host {
     display: block;
-    font-family: 'Barlow', sans-serif;
+    //font-family: 'Barlow', sans-serif;
 }
 
-// ── CSS Variables ──────────────────────────────
 $navy: #1B3A6B;
 $navy-dark: #122850;
 $navy-light: #2a5298;
@@ -23,41 +22,22 @@ $text-muted: #6b7a8d;
 $border: #C5CDD6;
 $error: #c0392b;
 
-// ── Wrapper ────────────────────────────────────
 .login-wrapper {
-    min-height: 100vh;
-    background-color: $bg;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
 }
 
-// ── Background Accents ─────────────────────────
 .bg-accent {
     position: absolute;
     border-radius: 50%;
     pointer-events: none;
     z-index: 0;
 
-    &--top-right {
-        width: 420px;
-        height: 420px;
-        top: -160px;
-        right: -160px;
-        background: radial-gradient(circle, rgba($navy, 0.08) 0%, transparent 70%);
-    }
-
-    &--bottom-left {
-        width: 340px;
-        height: 340px;
-        bottom: -120px;
-        left: -120px;
-        background: radial-gradient(circle, rgba($orange, 0.10) 0%, transparent 70%);
-    }
+  
 }
 
-// ── Header ─────────────────────────────────────
 .header {
     padding: 28px 48px;
     position: relative;
@@ -69,71 +49,8 @@ $error: #c0392b;
     align-items: center;
     gap: 10px;
     text-decoration: none;
-
-    &__icon {
-        width: 42px;
-        height: 42px;
-        background-color: $navy;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    &__chevron {
-        color: $orange;
-        font-size: 22px;
-        font-weight: 900;
-        line-height: 1;
-        letter-spacing: -4px;
-        padding-left: 4px;
-    }
-
-    &__text {
-        line-height: 1;
-    }
-
-    &__brand {
-        display: flex;
-        align-items: flex-start;
-        gap: 1px;
-    }
-
-    &__master {
-        font-family: 'Barlow Condensed', sans-serif;
-        font-size: 20px;
-        font-weight: 800;
-        color: $navy;
-        letter-spacing: 0.5px;
-    }
-
-    &__reg {
-        font-size: 9px;
-        color: $navy;
-        font-weight: 700;
-        margin-top: 2px;
-    }
-
-    &__builders {
-        font-family: 'Barlow Condensed', sans-serif;
-        font-size: 20px;
-        font-weight: 800;
-        color: $navy;
-        letter-spacing: 0.5px;
-        margin-top: -3px;
-    }
-
-    &__solutions {
-        font-family: 'Barlow Condensed', sans-serif;
-        font-size: 13px;
-        font-weight: 700;
-        color: $orange;
-        letter-spacing: 2px;
-        margin-top: -2px;
-    }
 }
 
-// ── Main ───────────────────────────────────────
 .main {
     flex: 1;
     display: flex;
@@ -145,10 +62,9 @@ $error: #c0392b;
     z-index: 1;
 }
 
-// ── Login Card ─────────────────────────────────
 .login-card {
     width: 100%;
-    max-width: 440px;
+    max-width: 50%;
     background: $bg-card;
     border-radius: 16px;
     box-shadow:
@@ -160,11 +76,6 @@ $error: #c0392b;
     position: relative;
     animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 
-    &__stripe {
-        width: 5px;
-        flex-shrink: 0;
-        background: linear-gradient(180deg, $navy 0%, $orange 100%);
-    }
 
     &__inner {
         flex: 1;
@@ -257,7 +168,6 @@ $error: #c0392b;
     }
 }
 
-// ── Microsoft Button ───────────────────────────
 .btn-microsoft {
     width: 100%;
     display: flex;
@@ -308,7 +218,6 @@ $error: #c0392b;
     }
 }
 
-// ── Spinner ────────────────────────────────────
 .spinner {
     display: inline-block;
     width: 18px;
@@ -318,55 +227,6 @@ $error: #c0392b;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
 }
-
-// ── Feature Hints ──────────────────────────────
-.features-hint {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px 24px;
-    margin-top: 28px;
-    max-width: 440px;
-    width: 100%;
-}
-
-.feature-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    span {
-        font-size: 13px;
-        color: $text-muted;
-        font-weight: 500;
-    }
-
-    &__dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: $navy;
-        flex-shrink: 0;
-
-        &--orange {
-            background-color: $orange;
-        }
-    }
-}
-
-// ── Footer ─────────────────────────────────────
-.footer {
-    text-align: center;
-    padding: 20px 24px;
-    position: relative;
-    z-index: 1;
-
-    span {
-        font-size: 12px;
-        color: darken($text-muted, 10%);
-    }
-}
-
-// ── Animations ─────────────────────────────────
 @keyframes cardIn {
     from {
         opacity: 0;

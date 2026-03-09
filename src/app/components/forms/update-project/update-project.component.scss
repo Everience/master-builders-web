@@ -2,18 +2,7 @@
     width: 100%;
     display: flex;
     justify-content: flex-start;
-    margin-top: 40px;
-
-    .switch-btn {
-        button {
-            border: none;
-            color: #fff;
-            background-color: #004a96;
-            padding: 15px 39px;
-            font-size: 14px;
-            border-radius: 7px;
-        }
-    }
+    margin-top: 25px;
 
     .form-container {
         @media screen and (max-width: 900px) {
@@ -22,11 +11,12 @@
 
         @media screen and (min-width: 901px) {
             width: 60%;
+            max-width: 760px;
         }
     }
 }
 
-.voting-form {
+.project-form {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -38,14 +28,10 @@
         margin-bottom: 1rem;
 
         label {
-            font-size: 14px;
+            font-size: 0.9rem;
             font-weight: 600;
             margin-bottom: 0.4rem;
             color: #007acc;
-            /*&:after {
-        content: " *";
-        color: #007acc;
-      }*/
         }
 
         input,
@@ -85,22 +71,6 @@
         }
     }
 
-    .radio-buttons-container{
-        display: flex;
-        flex-direction: column;
-        .radio-label-container{
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            margin-bottom: 5px;
-            label{
-                margin-bottom: 0px;
-                color: #292929;
-                font-weight: 400;
-            }
-        }
-    }
-
     .button-container {
         display: flex;
         justify-content: center;
@@ -121,6 +91,10 @@
             &:disabled {
                 background: #ccc;
                 cursor: not-allowed;
+            }
+
+            &:hover {
+                background-color: #004a96;
             }
         }
     }
