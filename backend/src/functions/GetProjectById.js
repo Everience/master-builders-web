@@ -4,7 +4,7 @@ const { getConnection } = require("../../db.js");
 // GET /api/GetProject?id=123
 app.http("GetProjectById", {
   methods: ["GET"],
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: async (request, context) => {
     try {
       const id = request.query.get("project_id");

@@ -3,7 +3,7 @@ const { getConnection } = require("../../db.js");
 
 app.http("GetProjects", {
   methods: ["GET"],
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: async (request, context) => {
     try {
       const pool = await getConnection();
