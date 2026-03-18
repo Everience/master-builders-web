@@ -7,24 +7,20 @@ import { environment } from '../../../environments/environments';
   providedIn: 'root'
 })
 export class ProjectService {
-  private baseUrl = environment.azureFunctions.baseUrl;
-
   constructor(private http: HttpClient) {}
+
+  private baseUrl = environment.azureFunctions.baseUrl;
+  private key = environment.azureFunctions.hostKey;
 
   getProjectById(projectId: number): Observable<any> {
     return this.http.get(`${this.baseUrl}/GetProjectById`, {
-      params: {
-        project_id: projectId,
-        code: environment.azureFunctions.keys.GetProjectById
-      }
+      params: { project_id: projectId, code: this.key }
     });
   }
 
   getProjects(): Observable<any> {
     return this.http.get(`${this.baseUrl}/GetProjects`, {
-      params: {
-        code: environment.azureFunctions.keys.GetProjects
-      }
+      params: { code: this.key }
     });
   }
 }
