@@ -2,36 +2,38 @@
 const { app } = require("@azure/functions");
 const { getConnection } = require("../../db.js");
 
-// POST /api/CreateProject
-// Body: { name, description, ... }
-app.http("CreateProject", {
-  methods: ["POST"],
-  authLevel: "anonymous",
+// GET /api/GetProject?id=123
+app.http("GetProjectById", {
+  methods: ["GET"],
+  authLevel: "function",
   handler: async (request, context) => {
     try {
-      const body = await request.json();
-      const { name, description } = body;
+      const id = request.query.get("project_id");
 
-      if (!name) {
+      if (!id) {
         return {
           status: 400,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ error: "Il campo 'name' è obbligatorio" }),
+          body: JSON.stringify({ error: "ID mancante" }),
         };
       }
 
       const pool = await getConnection();
       const result = await pool
         .request()
-        .input("name", name)
-        .input("description", description ?? null).query(`
-          INSERT INTO Projects (name, description)
-          OUTPUT INSERTED.*
-          VALUES (@name, @description)
-        `);
+        .input("project_id", id)
+        .query("SELECT * FROM Projects WHERE project_id = @project_id");
+
+      if (result.recordset.length === 0) {
+        return {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ error: "Progetto non trovato" }),
+        };
+      }
 
       return {
-        status: 201,
+        status: 200,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ project: result.recordset[0] }),
       };
@@ -51,40 +53,39 @@ const { app } = require("@azure/functions");
 const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
 
-// POST /api/CreateProject
-app.http("CreateProject", {
-  methods: ["POST", "OPTIONS"],
-  authLevel: "anonymous",
+app.http("GetProjectByCode", {
+  methods: ["GET", "OPTIONS"],
+  authLevel: "function",
   handler: async (request, context) => {
-    // 👉 preflight CORS
+    // 👉 gestione preflight
     const preflight = handleCors(request);
     if (preflight) return preflight;
 
     try {
-      const body = await request.json();
-      const { name, description } = body;
+      const code = request.query.get("project_code");
 
-      if (!name) {
+      if (!code) {
         return withCors({
           status: 400,
-          body: JSON.stringify({
-            error: "Il campo 'name' è obbligatorio",
-          }),
+          body: JSON.stringify({ error: "Code mancante" }),
         });
       }
 
       const pool = await getConnection();
       const result = await pool
         .request()
-        .input("name", name)
-        .input("description", description ?? null).query(`
-          INSERT INTO Projects (name, description)
-          OUTPUT INSERTED.*
-          VALUES (@name, @description)
-        `);
+        .input("project_code", code)
+        .query("SELECT * FROM Projects WHERE project_code = @project_code");
+
+      if (result.recordset.length === 0) {
+        return withCors({
+          status: 404,
+          body: JSON.stringify({ error: "Progetto non trovato" }),
+        });
+      }
 
       return withCors({
-        status: 201,
+        status: 200,
         body: JSON.stringify({ project: result.recordset[0] }),
       });
     } catch (err) {
