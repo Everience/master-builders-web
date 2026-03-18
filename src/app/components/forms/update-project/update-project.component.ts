@@ -7,6 +7,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ProjectService } from '../../../services/project/project.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-update-project',
@@ -33,7 +35,7 @@ export class UpdateProjectComponent {
   projectPhases = ['Business Case', 'Lab Phase', 'Pilot Phase', 'Launch Phase'];
   projectStatuses = ['In Progress', 'On Hold', 'Completed'];
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(private fb: FormBuilder, private router: Router, private projectService: ProjectService) {
     this.projectForm = this.fb.group({
       projectID: ['', Validators.required],
       projectCode: ['', Validators.required],
@@ -59,6 +61,7 @@ export class UpdateProjectComponent {
 
   removeFile(index: number) {
     this.uploadedFiles.splice(index, 1);
+    this.getAllProjects();
   }
 
   onSubmit() {
@@ -70,4 +73,27 @@ export class UpdateProjectComponent {
       this.projectForm.markAllAsTouched();
     }
   }
+
+    loadProject() {
+    this.projectService.getProjectById(123).subscribe({
+      next: (res) => {
+        console.log(res.project);
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
+
+    getAllProjects() {
+  this.projectService.getProjects().subscribe({
+    next: (res) => {
+      // check res.projects exists
+      console.log('Projects:', res.projects || res); 
+    },
+    error: (err) => {
+      console.error('Error fetching projects:', err);
+    }
+  });
+}
 }
