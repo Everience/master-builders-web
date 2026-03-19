@@ -6,7 +6,13 @@
 
             <div class="form-group">
                 <label>Project Code</label>
-                <input type="text" formControlName="projectCode" />
+                <div class="code-input-wrapper">
+                    <input type="text" formControlName="projectCode" (keydown.enter)="$event.preventDefault(); searchProject()" />
+                    <button type="button" class="search-btn" (click)="searchProject()" [disabled]="isSearching">
+                        <span *ngIf="!isSearching">🔍</span>
+                        <span *ngIf="isSearching">⏳</span>
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">

@@ -18,6 +18,12 @@ export class ProjectService {
     });
   }
 
+  getProjectByCode(projectCode: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/GetProjectByCode`, {
+      params: { project_code: projectCode, code: this.key }
+    });
+  }
+
   getProjects(): Observable<any> {
     return this.http.get(`${this.baseUrl}/GetProjects`, {
       params: { code: this.key }
