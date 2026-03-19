@@ -1,0 +1,11 @@
+{
+  "/api/*": {
+    "target": "https://masterbuilderbackend.azurewebsites.net",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": "/api"
+    },
+    "logLevel": "debug"
+  }
+}

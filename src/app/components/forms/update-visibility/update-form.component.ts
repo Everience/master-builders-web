@@ -29,7 +29,7 @@ export class UpdateFormComponent {
   
     constructor(private fb: FormBuilder, private router: Router) {
       this.votingForm = this.fb.group({
-        projectID: ['', Validators.required],
+        projectCode: ['', Validators.required],
         projectStatus: ['', Validators.required],
         projectVisibility: ['', Validators.required]
       });

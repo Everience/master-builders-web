@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environments';
 
@@ -29,4 +29,10 @@ export class ProjectService {
       params: { code: this.key }
     });
   }
+
+  voteProject(payload: {project_id: string; user_id: string; score: number; score_reasoning: string;  }): Observable<any> {
+        return this.http.post(`${this.baseUrl}/VoteProject`, payload, {
+        params: { code: this.key } 
+      });
+    }
 }
