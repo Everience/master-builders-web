@@ -1,6 +1,8 @@
 const { app } = require("@azure/functions");
 const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
+const withAuth = require("../auth/withAuth.js");
+const requireRole = require("../auth/requireRole.js");
 
 app.http("DisableUser", {
   methods: ["POST", "OPTIONS"],
@@ -10,6 +12,9 @@ app.http("DisableUser", {
     if (preflight) return preflight;
 
     try {
+      const user = await withAuth(request, context);
+      requireRole(user, "admin");
+
       const body = await request.json();
       const { user_id } = body;
 
@@ -45,6 +50,13 @@ app.http("DisableUser", {
       });
     } catch (err) {
       context.error(err);
+
+      if (err.message === "FORBIDDEN") {
+        return withCors({
+          status: 403,
+          body: JSON.stringify({ error: "Forbidden" }),
+        });
+      }
 
       return withCors({
         status: 500,
