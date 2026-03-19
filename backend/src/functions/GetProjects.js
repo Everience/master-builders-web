@@ -71,6 +71,7 @@ app.http("GetProjects", {
 const { app } = require("@azure/functions");
 const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
+const validateToken = require("../auth/validateToken.js");
 
 app.http("GetProjects", {
   methods: ["GET", "OPTIONS"],
@@ -81,6 +82,23 @@ app.http("GetProjects", {
     if (preflight) return preflight;
 
     try {
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader)
+        return withCors({ status: 401, body: "Missing Authorization header" });
+
+      const token = authHeader.split(" ")[1];
+      if (!token)
+        return withCors({
+          status: 401,
+          body: "Malformed Authorization header",
+        });
+
+      const decoded = await validateToken(token);
+      context.log(
+        "User authenticated:",
+        decoded?.preferred_username || decoded?.oid
+      );
+
       const pool = await getConnection();
       const result = await pool.request().query("SELECT * FROM Projects");
 
@@ -90,6 +108,16 @@ app.http("GetProjects", {
       });
     } catch (err) {
       console.error("Function error:", err);
+
+      if (
+        err.name === "JsonWebTokenError" ||
+        err.name === "TokenExpiredError"
+      ) {
+        return withCors({
+          status: 401,
+          body: JSON.stringify({ error: "Unauthorized" }),
+        });
+      }
 
       return withCors({
         status: 500,
