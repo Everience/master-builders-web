@@ -6,7 +6,7 @@ const requireRole = require("../auth/requireRole.js");
 
 app.http("GetProjectByCode", {
   methods: ["GET", "OPTIONS"],
-  authLevel: "function",
+  authLevel: "anonymous",
   handler: async (request, context) => {
     // 👉 gestione preflight
     const preflight = handleCors(request);

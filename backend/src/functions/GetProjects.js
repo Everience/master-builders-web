@@ -6,7 +6,7 @@ const withAuth = require("../auth/withAuth.js");
 
 app.http("GetProjects", {
   methods: ["GET", "OPTIONS"],
-  authLevel: "function",
+  authLevel: "anonymous",
   handler: async (request, context) => {
     // 👉 gestione preflight CORS
     const preflight = handleCors(request);

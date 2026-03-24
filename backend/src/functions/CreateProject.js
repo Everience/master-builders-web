@@ -11,9 +11,9 @@ const projectSchema = {
   project_phase: { required: true, type: "string" },
   project_status: { required: true, type: "string" },
   notes: { required: true, type: "string" },
-  attachments_link: { required: false, type: "string" },
   project_visibility: { required: true, type: "string" },
   innovation_area: { required: true, type: "string" },
+  attachments_link: { required: false, type: "string" },
 };
 
 function validate(schema, data) {
@@ -59,7 +59,7 @@ function validate(schema, data) {
 // POST /api/CreateProject
 app.http("CreateProject", {
   methods: ["POST", "OPTIONS"],
-  authLevel: "function",
+  authLevel: "anonymous",
   handler: async (request, context) => {
     // 👉 preflight CORS
     const preflight = handleCors(request);
@@ -101,6 +101,7 @@ app.http("CreateProject", {
           }),
         });
       }
+
       const result = await pool
         .request()
         .input("project_name", cleaned.project_name)

@@ -1,6 +1,12 @@
+const { app } = require("@azure/functions");
+const { getConnection } = require("../../db.js");
+const { handleCors, withCors } = require("../../cors.js");
+const validateToken = require("../auth/validateToken.js");
+const withAuth = require("../auth/withAuth.js");
+
 app.http("VoteProject", {
   methods: ["POST", "OPTIONS"],
-  authLevel: "function",
+  authLevel: "anonymous",
   handler: async (request, context) => {
     const preflight = handleCors(request);
     if (preflight) return preflight;
