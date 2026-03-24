@@ -4,7 +4,7 @@ const { handleCors, withCors } = require("../../cors.js");
 const withAuth = require("../auth/withAuth.js");
 const requireRole = require("../auth/requireRole.js");
 
-app.http("ChangeUserStatus", {
+app.http("ChangeUserStatusById", {
   methods: ["POST", "OPTIONS"],
   authLevel: "anonymous",
   handler: async (request, context) => {
@@ -25,11 +25,11 @@ app.http("ChangeUserStatus", {
         });
       }
 
-      if (!status || !["active", "disable"].includes(status)) {
+      if (!status || !["Active", "Inactive"].includes(status)) {
         return withCors({
           status: 400,
           body: JSON.stringify({
-            error: "status is required and must be 'active' or 'disable'",
+            error: "status is required and must be 'Active' or 'Inactive'",
           }),
         });
       }
