@@ -21,7 +21,7 @@ app.http("VoteProject", {
       const { project_id, score } = body;
       // FIX 5: trim su score_reasoning prima di validare e salvare
       const score_reasoning = body.score_reasoning?.trim();
-      const user_id = user.id;
+      const user_id = user.oid;
 
       if (
         !project_id ||
@@ -73,7 +73,7 @@ app.http("VoteProject", {
           });
         }
 
-        if (project.recordset[0].project_status !== "In progress") {
+        if (project.recordset[0].project_status !== "In Progress") {
           await transaction.rollback();
           return withCors({
             status: 400,
