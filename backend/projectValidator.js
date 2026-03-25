@@ -60,7 +60,6 @@ const projectSchema = {
   project_phase: { required: true, type: "string" },
   project_status: { required: true, type: "string" },
   notes: { required: true, type: "string" },
-  project_visibility: { required: true, type: "string" },
   innovation_area: { required: true, type: "string" },
   attachments_link: { required: false, type: "string" },
 };

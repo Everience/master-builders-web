@@ -1,17 +1,21 @@
-/*--login 
---solo admin 
---il fe con getprojtecs aha tutte le info dei provideZoneChangeDetection
---mi serve il porject id del vecchio 
-FARE IN MODO DI FARE TUTTO IN BLOCCO 
-update visibility a inacyive del vechio project 
-creazione del nuovo project in tabella con una insert */
-
 const { app } = require("@azure/functions");
 const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
 const withAuth = require("../auth/withAuth.js");
 const requireRole = require("../auth/requireRole.js");
 const { projectSchema, validate } = require("../../projectValidator.js");
+
+// Funzione per generare project_id tipo FE43C-DD6C8
+function generateProjectId() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let part1 = "",
+    part2 = "";
+  for (let i = 0; i < 5; i++)
+    part1 += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 5; i++)
+    part2 += chars[Math.floor(Math.random() * chars.length)];
+  return `${part1}-${part2}`;
+}
 
 // POST /api/UpdateProject
 app.http("UpdateProject", {
@@ -28,7 +32,6 @@ app.http("UpdateProject", {
       const body = await request.json();
       const { old_project_id, ...projectData } = body;
 
-      // validazione old_project_id
       if (!old_project_id) {
         return withCors({
           status: 400,
@@ -42,7 +45,6 @@ app.http("UpdateProject", {
 
       // validazione campi nuovo progetto
       const { errors, cleaned } = validate(projectSchema, projectData);
-
       if (Object.keys(errors).length > 0) {
         return withCors({
           status: 400,
@@ -57,7 +59,7 @@ app.http("UpdateProject", {
       try {
         await transaction.begin();
 
-        // 1️⃣ Verifica che il vecchio progetto esista
+        // 1️⃣ Controlla che il vecchio progetto esista
         const existing = await transaction
           .request()
           .input("old_project_id", old_project_id)
@@ -75,17 +77,33 @@ app.http("UpdateProject", {
           });
         }
 
-        // 2️⃣ Imposta project_visibility = 'inactive' sul vecchio progetto
+        // 2️⃣ Disattiva il vecchio progetto
         await transaction.request().input("old_project_id", old_project_id)
           .query(`
             UPDATE Projects
-            SET project_visibility = 'inactive'
+            SET project_visibility = 'inactive',
+                project_status = 'Completed'
             WHERE project_id = @old_project_id
           `);
 
-        // 3️⃣ Inserisce il nuovo progetto
+        // 3️⃣ Genera project_id unico per il nuovo progetto
+        let project_id;
+        let exists;
+        do {
+          project_id = generateProjectId();
+          const check = await transaction
+            .request()
+            .input("project_id", project_id)
+            .query("SELECT 1 FROM Projects WHERE project_id = @project_id");
+          exists = check.recordset.length > 0;
+        } while (exists);
+
+        context.log("Generated unique project_id:", project_id);
+
+        // 4️⃣ Inserisci il nuovo progetto
         const result = await transaction
           .request()
+          .input("project_id", project_id)
           .input("project_name", cleaned.project_name)
           .input("project_code", cleaned.project_code)
           .input("region", cleaned.region)
@@ -94,9 +112,10 @@ app.http("UpdateProject", {
           .input("project_status", cleaned.project_status)
           .input("notes", cleaned.notes)
           .input("attachments_link", cleaned.attachments_link)
-          .input("project_visibility", cleaned.project_visibility)
+          .input("project_visibility", "active")
           .input("innovation_area", cleaned.innovation_area).query(`
             INSERT INTO Projects (
+              project_id,
               project_name,
               project_code,
               region,
@@ -110,6 +129,7 @@ app.http("UpdateProject", {
             )
             OUTPUT INSERTED.*
             VALUES (
+              @project_id,
               @project_name,
               @project_code,
               @region,
@@ -137,7 +157,7 @@ app.http("UpdateProject", {
         });
       } catch (txErr) {
         await transaction.rollback();
-        throw txErr; // rilancia al catch esterno
+        throw txErr;
       }
     } catch (err) {
       context.error(err);
