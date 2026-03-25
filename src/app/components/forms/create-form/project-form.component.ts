@@ -45,7 +45,7 @@ export class ProjectFormComponent {
       projectPhase: ['', Validators.required],
       projectStatus: ['', Validators.required],
       notes: [''],
-      attachments: [null],
+      attachmentsLink:  [''],
     });
   }
 
@@ -103,7 +103,6 @@ export class ProjectFormComponent {
 
   switch (status) {
     case 400:
-      // Validation errors — show each field error
       const errors = err.error?.errors;
       if (errors) {
         const messages = Object.values(errors).join(' | ');

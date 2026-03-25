@@ -1,3 +1,4 @@
+<!--CREATE PROJECT FORM-->
 <button class="back-btn" (click)="goBack()">Back to Home</button>
 <div class="main">
   <div class="form-container">
@@ -61,7 +62,7 @@
       <div class="form-group">
         <label>Attachments <br> <span style="font-size: 0.75rem;">You can upload a maximum of 10files, up to 10MB
             each</span></label>
-        <input type="file" multiple (change)="onFileSelected($event)" />
+        <input type="text" formControlName="attachmentsLink" placeholder="E.g.: https://netecoorg.sharepoint.com/..." />
         <ul class="file-list" *ngIf="uploadedFiles.length">
           <li *ngFor="let file of uploadedFiles; let i = index">
             {{ file.name }}

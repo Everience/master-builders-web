@@ -63,21 +63,23 @@ export class ProjectService {
   }
 
     createProject(payload: {
-      project_name: string;
-      project_code: string;
-      region: string;
-      market_segment: string;
-      project_phase: string;
-      project_status: string;
-      notes: string;
-      attachments_link: string;
-      project_visibility: string;
-      innovation_area: string;
-      }): Observable<any> {
-        return this.http.post(
+  project_name: string;
+  project_code: string;
+  region: string;
+  market_segment: string;
+  project_phase: string;
+  project_status: string;
+  notes: string;
+  attachments_link: string;
+  project_visibility: string;
+  innovation_area: string;
+  }): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.post(
         `${this.baseUrl}/CreateProject`,
         payload,
-        { params: { code: this.key } }
-      );
-    }
+        { headers, params: { code: this.key } }
+      ))
+    );
+  }
 }
