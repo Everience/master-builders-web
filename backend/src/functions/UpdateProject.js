@@ -29,13 +29,13 @@ app.http("UpdateProject", {
       const { old_project_id, ...projectData } = body;
 
       // validazione old_project_id
-      if (!old_project_id || typeof old_project_id !== "number") {
+      if (!old_project_id) {
         return withCors({
           status: 400,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             success: false,
-            error: "old_project_id è obbligatorio e deve essere un numero",
+            error: "old_project_id è obbligatorio",
           }),
         });
       }
