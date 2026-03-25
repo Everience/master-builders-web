@@ -13,7 +13,7 @@ app.http("GetAllUsers", {
 
     try {
       const user = await withAuth(request, context);
-
+      requireRole(user, "admin");
       const pool = await getConnection();
 
       const result = await pool.request().query(`

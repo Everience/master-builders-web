@@ -14,8 +14,24 @@ app.http("GetProjects", {
 
     try {
       const user = await withAuth(request, context);
+      requireRole(user, "admin", "user");
       const pool = await getConnection();
-      const result = await pool.request().query("SELECT * FROM Projects");
+      const result = await pool.request().query(`
+        SELECT 
+          project_id,
+          project_name,
+          project_code,
+          region,
+          market_segment,
+          project_phase,
+          project_status,
+          notes,
+          attachments_link,
+          project_visibility,
+          innovation_area,
+          created_at
+        FROM Projects
+        `);
 
       return withCors({
         status: 200,
