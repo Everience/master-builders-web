@@ -63,20 +63,42 @@ export class ProjectService {
   }
 
     createProject(payload: {
-  project_name: string;
-  project_code: string;
-  region: string;
-  market_segment: string;
-  project_phase: string;
-  project_status: string;
-  notes: string;
-  attachments_link: string;
-  project_visibility: string;
-  innovation_area: string;
-  }): Observable<any> {
+      project_name: string;
+      project_code: string;
+      region: string;
+      market_segment: string;
+      project_phase: string;
+      project_status: string;
+      notes: string;
+      attachments_link: string;
+      project_visibility: string;
+      innovation_area: string;
+      }): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.post(
         `${this.baseUrl}/CreateProject`,
+        payload,
+        { headers, params: { code: this.key } }
+      ))
+    );
+  }
+
+  updateProject(payload: {
+    old_project_id: string;
+    project_name: string;
+    project_code: string;
+    region: string;
+    market_segment: string;
+    project_phase: string;
+    project_status: string;
+    notes: string;
+    attachments_link: string;
+    project_visibility: string;
+    innovation_area: string;
+  }): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.post(
+        `${this.baseUrl}/UpdateProject`,
         payload,
         { headers, params: { code: this.key } }
       ))

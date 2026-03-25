@@ -21,10 +21,11 @@ import { ToastService } from '../../../services/project/toast.service';
 })
 export class UpdateProjectComponent implements OnInit {
   private destroy$ = new Subject<void>();
+  currentProjectId: string | null = null;
+  isSearching = false;
+  isSubmitting = false;
   projectForm!: FormGroup;
   uploadedFiles: File[] = [];
-  isSearching = false;
-
   regions = ['AMET', 'ANZ', 'EU', 'GLOBAL', 'BA', 'SA'];
   marketSegments = ['AS', 'CA', 'CS', 'FIBERS', 'UGC', 'VTG'];
   innovationAreas = [
@@ -52,7 +53,7 @@ export class UpdateProjectComponent implements OnInit {
       marketSegment:  ['', Validators.required],
       projectPhase:   ['', Validators.required],
       notes:          [''],
-      attachments:    [null],
+      attachmentsLink:[''],
     });
   }
 
@@ -65,6 +66,7 @@ export class UpdateProjectComponent implements OnInit {
     this.projectService.getProjectByCode(code).subscribe({
       next: (res) => {
         const p = res.project;
+        this.currentProjectId = p.project_id;
         this.projectForm.patchValue({
           projectName:    p.project_name,
           projectStatus:  p.project_status,
@@ -73,6 +75,7 @@ export class UpdateProjectComponent implements OnInit {
           marketSegment:  p.market_segment,
           notes:          p.notes,
           projectPhase:   p.project_phase,
+          attachmentsLink: p.attachments_link || '',
         }, { emitEvent: false });
 
         ['projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes', 'projectPhase']
@@ -101,44 +104,70 @@ export class UpdateProjectComponent implements OnInit {
       marketSegment:  '',
       notes:          '',
       projectPhase:   '',
+      attachmentsLink:'',
     }, { emitEvent: false });
   }
 
-  goBack() {
-      this.router.navigate(['/home']);
-    }
-
-    onFileSelected(event: any) {
-    const files = Array.from(event.target.files) as File[];
-    this.uploadedFiles.push(...files);
-  }
-
-  removeFile(index: number) {
-    this.uploadedFiles.splice(index, 1);
-    
-  }
-
   onSubmit() {
-    if (this.projectForm.valid) {
-      console.log('Form Data:', this.projectForm.value);
-      console.log('Uploaded Files:', this.uploadedFiles);
-      alert('Form submitted successfully!');
-    } else {
+    if (this.projectForm.invalid) {
       this.projectForm.markAllAsTouched();
+      return;
     }
+
+    if (!this.currentProjectId) {
+      this.toast.warning('Cerca prima un progetto tramite il codice.');
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    //getRawValue() gets values from disabled fields too
+    const f = this.projectForm.getRawValue();
+
+    const payload = {
+      old_project_id:     this.currentProjectId,
+      project_name:       f.projectName,
+      project_code:       f.projectCode,
+      region:             f.region,
+      market_segment:     f.marketSegment,
+      project_phase:      f.projectPhase,
+      project_status:     f.projectStatus,
+      notes:              f.notes || '',
+      attachments_link:   f.attachmentsLink || '',
+      project_visibility: 'Active',
+      innovation_area:    f.innovationArea,
+    };
+
+    this.projectService.updateProject(payload).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.toast.success('Progetto aggiornato con successo!');
+        setTimeout(() => this.router.navigate(['/home']), 2000);
+      },
+      error: (err: any) => {
+        this.isSubmitting = false;
+        this.handleError(err);
+      }
+    });
   }
 
   private handleError(err: any) {
     switch (err.status) {
       case 400:
-        this.toast.warning('Codice progetto mancante o non valido.');
+        const errors = err.error?.errors;
+        if (errors) {
+          const messages = Object.values(errors).join(' | ');
+          this.toast.error(`Dati non validi: ${messages}`);
+        } else {
+          this.toast.error(err.error?.error || 'Dati non validi. Controlla i campi.');
+        }
         break;
       case 401:
         this.toast.error('Sessione scaduta. Effettua di nuovo il login.');
         setTimeout(() => this.router.navigate(['/login']), 2000);
         break;
       case 403:
-        this.toast.error('Non hai i permessi per accedere a questo progetto.');
+        this.toast.error('Non hai i permessi per modificare questo progetto.');
         break;
       case 404:
         this.toast.error('Nessun progetto trovato con questo codice.');
@@ -150,4 +179,8 @@ export class UpdateProjectComponent implements OnInit {
         this.toast.error('Qualcosa è andato storto. Riprova.');
     }
   }
+
+  goBack() {
+      this.router.navigate(['/home']);
+    }
 }

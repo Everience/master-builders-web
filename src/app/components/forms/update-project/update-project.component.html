@@ -64,24 +64,15 @@
                     <option *ngFor="let phase of projectPhases" [value]="phase">{{ phase }}</option>
                 </select>
             </div>
-
-
-
             <div class="form-group">
-                <label>Attachments <br> <span style="font-size: 0.75rem;">You can upload a maximum of 10files, up to
-                        10MB
-                        each</span></label>
-                <input type="file" multiple (change)="onFileSelected($event)" />
-                <ul class="file-list" *ngIf="uploadedFiles.length">
-                    <li *ngFor="let file of uploadedFiles; let i = index">
-                        {{ file.name }}
-                        <button type="button" (click)="removeFile(i)">Remove</button>
-                    </li>
-                </ul>
+                <label>Attachments Link</label>
+                <input type="text" formControlName="attachmentsLink" placeholder="E.g.: https://netecoorg.sharepoint.com/..." />
             </div>
 
             <div class="button-container">
-                <button type="submit" [disabled]="projectForm.invalid">Submit</button>
+                <button type="submit" [disabled]="projectForm.invalid || isSubmitting || !currentProjectId">
+                    {{ isSubmitting ? 'Saving...' : 'Submit' }}
+                </button>
             </div>
         </form>
     </div>

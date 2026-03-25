@@ -12,18 +12,19 @@
                 <label>User Status*</label>
                 <div class="radio-buttons-container">
                     <div class="radio-label-container">
-                        <input type="radio" formControlName="userStatus" value="active" />
+                        <input type="radio" formControlName="userStatus" value="active" id="active" />
                         <label for="active">Active</label>
                     </div>
                     <div class="radio-label-container">
-                        <input type="radio" formControlName="userStatus" value="inactive" />
+                        <input type="radio" formControlName="userStatus" value="inactive" id="inactive" />
                         <label for="inactive">Inactive</label>
                     </div>
                 </div>
             </div>
-
             <div class="button-container">
-                <button type="submit" [disabled]="userStatusForm.invalid">Submit</button>
+                <button type="submit" [disabled]="userStatusForm.invalid || isSubmitting">
+                    {{ isSubmitting ? 'Saving...' : 'Submit' }}
+                </button>
             </div>
         </form>
     </div>
