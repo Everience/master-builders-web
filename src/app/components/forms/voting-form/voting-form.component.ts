@@ -8,6 +8,8 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProjectService } from '../../../services/project/project.service';
+import { ToastService } from '../../../services/project/toast.service';
+import { AuthService } from '../../../services/project/auth.service';
 
 @Component({
   selector: 'app-voting-form',
@@ -37,10 +39,11 @@ export class VotingFormComponent implements OnInit {
   private currentProjectId: string | null = null;
   isSubmitting = false;
   isLoadingProjects = false;
+  isSearching = false;
   submitError: string | null = null;
   submitSuccess = false;
 
-  constructor(private fb: FormBuilder, private router: Router, private projectService: ProjectService) {
+  constructor(private fb: FormBuilder, private router: Router, private projectService: ProjectService, private toast: ToastService, private authService: AuthService) {
     this.votingForm = this.fb.group({
       team:          ['', Validators.required],
       projectName:   ['', Validators.required],  
@@ -98,7 +101,6 @@ export class VotingFormComponent implements OnInit {
       projectDocs:    match.attachments_link,
     }, { emitEvent: false });
 
-    // Lock autofilled fields
     ['projectStatus', 'innovationArea', 'region', 'marketSegment', 'projectDocs']
       .forEach(field => this.votingForm.get(field)!.disable({ emitEvent: false }));
   }
@@ -132,8 +134,6 @@ export class VotingFormComponent implements OnInit {
 
     const payload = {
       project_id:      this.currentProjectId,
-      //TODO: here we need to get the userid from Microsoft 
-      user_id:         '4B2A7E1C-5D38-4F92-B061-F8A2D3C4E5B6', 
       score:           Number(this.votingForm.get('score')?.value),
       score_reasoning: this.votingForm.get('scoreReason')?.value,
     };
@@ -148,9 +148,37 @@ export class VotingFormComponent implements OnInit {
       error: (err) => {
         console.log(payload)
         this.isSubmitting = false;
-        this.submitError = err.error?.error || 'Something went wrong. Please try again.';
+        this.handleError(err);
       }
     });
+  }
+
+  private handleError(err: any) {
+    switch (err.status) {
+      case 400:
+        this.toast.warning(err.error?.error === 'Voting closed'
+          ? 'Il progetto non è aperto al voto.'
+          : 'Dati non validi. Controlla i campi.');
+        break;
+      case 401:
+        this.toast.error('Sessione scaduta. Effettua di nuovo il login.');
+        setTimeout(() => this.router.navigate(['/login']), 2000);
+        break;
+      case 403:
+        this.toast.error('Non hai i permessi per votare.');
+        break;
+      case 404:
+        this.toast.error('Progetto non trovato.');
+        break;
+      case 409:
+        this.toast.error('Hai già votato per questo progetto.');
+        break;
+      case 500:
+        this.toast.error('Errore interno al server. Riprova più tardi.');
+        break;
+      default:
+        this.toast.error('Qualcosa è andato storto. Riprova.');
+    }
   }
 
 }

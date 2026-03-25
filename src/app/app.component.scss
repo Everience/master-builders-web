@@ -7,13 +7,13 @@
   }
   .header {
     width: 100%;
-    margin: 20px 0 40px 0;
+    margin: 10px 0 40px 0;
     @media screen and (max-width: 900px) {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      img{
+      .logo{
         width: 120px;
       }
     }
@@ -21,6 +21,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      .logo{
+        width: 200px;
+      }
     }
   }
 }
@@ -39,12 +42,13 @@
 .button {
   display: flex;
   align-items: center;
+  justify-content: center;
   text-decoration: none;
   float: right;
   padding: 12px;
   margin: 15px;
   color: #000;
-  width: 45px;
+  width: 55px;
   //background-color: #004a96;
   transition: width .35s;
   -webkit-transition: width .35s;
@@ -58,11 +62,13 @@
 .logout-user{
   background-color: #004a96;
   color: #FFF;
-  width: 30px;
   border-radius: 50px;
-  float: left;
-  padding: 7px;
+  padding: 5px;
   font-size: 1em;
+  img{
+    margin-left: 5px;
+    margin-top: 2px;
+  }
 }
 
 a:hover {

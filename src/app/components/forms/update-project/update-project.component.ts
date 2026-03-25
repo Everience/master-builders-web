@@ -9,7 +9,7 @@ import {
 import { Router } from '@angular/router';
 import { ProjectService } from '../../../services/project/project.service';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, takeUntil, filter } from 'rxjs/operators';
+import { ToastService } from '../../../services/project/toast.service';
 
 
 @Component({
@@ -38,7 +38,7 @@ export class UpdateProjectComponent implements OnInit {
   projectPhases = ['Business Case', 'Lab Phase', 'Pilot Phase', 'Launch Phase'];
   projectStatuses = ['In Progress', 'On Hold', 'Completed'];
 
-  constructor(private fb: FormBuilder, private router: Router, private projectService: ProjectService) {
+  constructor(private fb: FormBuilder, private router: Router, private projectService: ProjectService, private toast: ToastService) {
     
   }
 
@@ -84,6 +84,7 @@ export class UpdateProjectComponent implements OnInit {
         console.error('Project not found:', err);
         this.clearAutofilledFields();
         this.isSearching = false;
+        this.handleError(err); 
       }
     });
   }
@@ -114,8 +115,7 @@ export class UpdateProjectComponent implements OnInit {
 
   removeFile(index: number) {
     this.uploadedFiles.splice(index, 1);
-    this.getAllProjects();
-    this.getProjectData();
+    
   }
 
   onSubmit() {
@@ -128,36 +128,26 @@ export class UpdateProjectComponent implements OnInit {
     }
   }
 
-  loadProject() {
-    this.projectService.getProjectById(123).subscribe({
-      next: (res) => {
-        console.log(res.project);
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
-  }
-
-  getProjectData() {
-    this.projectService.getProjectByCode('EBA05').subscribe({
-      next: (res) => {
-        console.log(res.project);
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
-  }
-
-  getAllProjects() {
-    this.projectService.getProjects().subscribe({
-      next: (res) => {
-        console.log('Projects:', res.projects || res); 
-      },
-      error: (err) => {
-        console.error('Error fetching projects:', err);
-      }
-    });
+  private handleError(err: any) {
+    switch (err.status) {
+      case 400:
+        this.toast.warning('Codice progetto mancante o non valido.');
+        break;
+      case 401:
+        this.toast.error('Sessione scaduta. Effettua di nuovo il login.');
+        setTimeout(() => this.router.navigate(['/login']), 2000);
+        break;
+      case 403:
+        this.toast.error('Non hai i permessi per accedere a questo progetto.');
+        break;
+      case 404:
+        this.toast.error('Nessun progetto trovato con questo codice.');
+        break;
+      case 500:
+        this.toast.error('Errore interno al server. Riprova più tardi.');
+        break;
+      default:
+        this.toast.error('Qualcosa è andato storto. Riprova.');
+    }
   }
 }
