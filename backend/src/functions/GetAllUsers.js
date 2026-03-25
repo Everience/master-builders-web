@@ -20,10 +20,11 @@ app.http("GetAllUsers", {
       const result = await pool.request().query(`
             SELECT 
               user_id,
-              name,
+              user_name,
               email,
               role,
-              user_status
+              user_status,
+              department
             FROM Users
           `);
 
