@@ -2,6 +2,7 @@ const { app } = require("@azure/functions");
 const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
 const withAuth = require("../auth/withAuth.js");
+const requireRole = require("../auth/requireRole.js");
 
 app.http("GetAllUsers", {
   methods: ["GET", "OPTIONS"],

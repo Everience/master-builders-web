@@ -3,6 +3,7 @@ const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
 const validateToken = require("../auth/validateToken.js");
 const withAuth = require("../auth/withAuth.js");
+const requireRole = require("../auth/requireRole.js");
 
 app.http("GetProjects", {
   methods: ["GET", "OPTIONS"],
