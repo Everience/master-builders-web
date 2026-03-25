@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -20,12 +20,10 @@ import { ToastService } from '../../../services/project/toast.service';
   styleUrl: './update-project.component.scss'
 })
 export class UpdateProjectComponent implements OnInit {
-  private destroy$ = new Subject<void>();
   currentProjectId: string | null = null;
   isSearching = false;
   isSubmitting = false;
   projectForm!: FormGroup;
-  uploadedFiles: File[] = [];
   regions = ['AMET', 'ANZ', 'EU', 'GLOBAL', 'BA', 'SA'];
   marketSegments = ['AS', 'CA', 'CS', 'FIBERS', 'UGC', 'VTG'];
   innovationAreas = [
@@ -67,6 +65,7 @@ export class UpdateProjectComponent implements OnInit {
       next: (res) => {
         const p = res.project;
         this.currentProjectId = p.project_id;
+        console.log(this.currentProjectId)
         this.projectForm.patchValue({
           projectName:    p.project_name,
           projectStatus:  p.project_status,

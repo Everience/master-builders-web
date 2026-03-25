@@ -1,12 +1,44 @@
 
-html,
-body {
-  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
-  background-color: #dde1e5;
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+
+:root {
+  --navy: #003087;
+  --navy-dark: #00215e;
+  --navy-light: #e8eef7;
+  --amber: #F5A623;
+  --amber-dark: #d4891a;
+  --white: #ffffff;
+  --bg: #f4f6f9;
+  --text: #1a1a2e;
+  --muted: #6b7a99;
+  --border: #dce3ef;
+  --card-bg: #ffffff;
+  --shadow-sm: 0 2px 8px rgba(0, 48, 135, 0.08);
+  --shadow-md: 0 8px 24px rgba(0, 48, 135, 0.12);
+  --shadow-lg: 0 16px 48px rgba(0, 48, 135, 0.16);
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 
 .back-btn {
   border: none;
