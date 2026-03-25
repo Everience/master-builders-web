@@ -3,63 +3,24 @@ const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
 const withAuth = require("../auth/withAuth.js");
 const requireRole = require("../auth/requireRole.js");
-const projectSchema = {
-  project_name: { required: true, type: "string" },
-  project_code: { required: true, type: "string" },
-  region: { required: true, type: "string" },
-  market_segment: { required: true, type: "string" },
-  project_phase: { required: true, type: "string" },
-  project_status: { required: true, type: "string" },
-  notes: { required: true, type: "string" },
-  attachments_link: { required: false, type: "string" },
-  project_visibility: { required: true, type: "string" },
-  innovation_area: { required: true, type: "string" },
-};
+const { projectSchema, validate } = require("../../projectValidator.js");
 
-function validate(schema, data) {
-  const errors = {};
-  const cleaned = {};
-
-  for (const field in schema) {
-    const rules = schema[field];
-    let value = data[field];
-
-    if (
-      rules.required &&
-      (value === undefined || value === null || value === "")
-    ) {
-      errors[field] = "Campo obbligatorio";
-      continue;
-    }
-
-    if (!rules.required && value === undefined) {
-      cleaned[field] = null;
-      continue;
-    }
-
-    if (rules.type === "string" && typeof value !== "string") {
-      errors[field] = `Deve essere di tipo ${rules.type}`;
-      continue;
-    }
-
-    if (rules.type === "string") {
-      value = value.trim();
-      if (rules.required && value === "") {
-        errors[field] = "Non può essere vuoto";
-        continue;
-      }
-    }
-
-    cleaned[field] = value ?? null;
-  }
-
-  return { errors, cleaned };
+// Funzione per generare project_id tipo FE43C-DD6C8
+function generateProjectId() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let part1 = "",
+    part2 = "";
+  for (let i = 0; i < 5; i++)
+    part1 += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 5; i++)
+    part2 += chars[Math.floor(Math.random() * chars.length)];
+  return `${part1}-${part2}`;
 }
 
 // POST /api/CreateProject
 app.http("CreateProject", {
   methods: ["POST", "OPTIONS"],
-  authLevel: "function",
+  authLevel: "anonymous",
   handler: async (request, context) => {
     // 👉 preflight CORS
     const preflight = handleCors(request);
@@ -70,28 +31,25 @@ app.http("CreateProject", {
       requireRole(user, "admin");
 
       const body = await request.json();
-
       const { errors, cleaned } = validate(projectSchema, body);
 
       if (Object.keys(errors).length > 0) {
         return withCors({
           status: 400,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            success: false,
-            errors,
-          }),
+          body: JSON.stringify({ success: false, errors }),
         });
       }
 
       const pool = await getConnection();
 
-      const existing = await pool
+      // ── STEP 1 — controlla project_code duplicato ───────────────
+      const existingCode = await pool
         .request()
         .input("project_code", cleaned.project_code)
         .query("SELECT 1 FROM Projects WHERE project_code = @project_code");
 
-      if (existing.recordset.length > 0) {
+      if (existingCode.recordset.length > 0) {
         return withCors({
           status: 409,
           headers: { "Content-Type": "application/json" },
@@ -101,8 +59,25 @@ app.http("CreateProject", {
           }),
         });
       }
+
+      // ── STEP 2 — genera project_id unico ───────────────────────
+      let project_id;
+      let exists;
+      do {
+        project_id = generateProjectId();
+        const check = await pool
+          .request()
+          .input("project_id", project_id)
+          .query("SELECT 1 FROM Projects WHERE project_id = @project_id");
+        exists = check.recordset.length > 0;
+      } while (exists);
+
+      context.log("Generated unique project_id:", project_id);
+
+      // ── STEP 3 — INSERT nel DB ────────────────────────────────
       const result = await pool
         .request()
+        .input("project_id", project_id)
         .input("project_name", cleaned.project_name)
         .input("project_code", cleaned.project_code)
         .input("region", cleaned.region)
@@ -114,6 +89,7 @@ app.http("CreateProject", {
         .input("project_visibility", cleaned.project_visibility)
         .input("innovation_area", cleaned.innovation_area).query(`
           INSERT INTO Projects (
+            project_id,
             project_name,
             project_code,
             region,
@@ -127,6 +103,7 @@ app.http("CreateProject", {
           )
           OUTPUT INSERTED.*
           VALUES (
+            @project_id,
             @project_name,
             @project_code,
             @region,
@@ -143,22 +120,17 @@ app.http("CreateProject", {
       return withCors({
         status: 201,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          success: true,
-          project: result.recordset[0],
-        }),
+        body: JSON.stringify({ success: true, project: result.recordset[0] }),
       });
     } catch (err) {
       context.error(err);
 
+      // gestione errori auth/forbidden
       if (err.message === "FORBIDDEN") {
         return withCors({
           status: 403,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            success: false,
-            error: "Forbidden",
-          }),
+          body: JSON.stringify({ success: false, error: "Forbidden" }),
         });
       }
 
@@ -171,13 +143,11 @@ app.http("CreateProject", {
         return withCors({
           status: 401,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            success: false,
-            error: "Unauthorized",
-          }),
+          body: JSON.stringify({ success: false, error: "Unauthorized" }),
         });
       }
 
+      // errore generico
       return withCors({
         status: 500,
         headers: { "Content-Type": "application/json" },

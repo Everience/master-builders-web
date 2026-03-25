@@ -4,9 +4,9 @@ const { handleCors, withCors } = require("../../cors.js");
 const withAuth = require("../auth/withAuth.js");
 const requireRole = require("../auth/requireRole.js");
 
-app.http("DisableUser", {
+app.http("ChangeUserStatusById", {
   methods: ["POST", "OPTIONS"],
-  authLevel: "function",
+  authLevel: "anonymous",
   handler: async (request, context) => {
     const preflight = handleCors(request);
     if (preflight) return preflight;
@@ -16,20 +16,32 @@ app.http("DisableUser", {
       requireRole(user, "admin");
 
       const body = await request.json();
-      const { user_id } = body;
+      const { user_id, status } = body;
 
       if (!user_id) {
         return withCors({
           status: 400,
-          body: JSON.stringify({ error: "user_id required" }),
+          body: JSON.stringify({ error: "user_id is required" }),
+        });
+      }
+
+      if (!status || !["Active", "Inactive"].includes(status)) {
+        return withCors({
+          status: 400,
+          body: JSON.stringify({
+            error: "status is required and must be 'Active' or 'Inactive'",
+          }),
         });
       }
 
       const pool = await getConnection();
 
-      const result = await pool.request().input("user_id", user_id).query(`
+      const result = await pool
+        .request()
+        .input("user_id", user_id)
+        .input("status", status).query(`
           UPDATE Users
-          SET user_status = Disable
+          SET user_status = @status
           OUTPUT INSERTED.*
           WHERE user_id = @user_id
         `);
@@ -44,12 +56,19 @@ app.http("DisableUser", {
       return withCors({
         status: 200,
         body: JSON.stringify({
-          message: "User disabled",
+          message: `User status changed to '${status}'`,
           user: result.recordset[0],
         }),
       });
     } catch (err) {
       context.error(err);
+
+      if (err.message === "NO_AUTH_HEADER" || err.message === "INVALID_TOKEN") {
+        return withCors({
+          status: 401,
+          body: JSON.stringify({ error: "Unauthorized" }),
+        });
+      }
 
       if (err.message === "FORBIDDEN") {
         return withCors({
@@ -61,7 +80,7 @@ app.http("DisableUser", {
       return withCors({
         status: 500,
         body: JSON.stringify({
-          error: "DB ERROR",
+          error: "Internal server error",
           message: err.message,
         }),
       });
