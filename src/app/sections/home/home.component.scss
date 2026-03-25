@@ -3,7 +3,7 @@ main {
 }
 
 .section-title {
-  //font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -18,14 +18,13 @@ main {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: center;
   max-width: 1120px;
   margin: 0 auto;
 }
 
 .card {
   position: relative;
-  width: 400px;
   background: var(--card-bg);
   border: 1.5px solid var(--border);
   border-radius: 12px;
@@ -37,8 +36,13 @@ main {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   box-shadow: var(--shadow-sm);
   animation: fadeUp 0.5s ease both;
+  @media screen and (max-width: 900px) {
+    width: 80%;
+  }
+  @media screen and (min-width: 901px) {
+    width: 45%;
+  }
 
-  // Amber top accent line
   &::before {
     content: '';
     position: absolute;
