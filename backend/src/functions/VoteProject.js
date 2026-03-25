@@ -1,8 +1,8 @@
 const { app } = require("@azure/functions");
 const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
-const validateToken = require("../auth/validateToken.js");
 const withAuth = require("../auth/withAuth.js");
+const requireRole = require("../auth/requireRole.js");
 
 app.http("VoteProject", {
   methods: ["POST", "OPTIONS"],
@@ -12,17 +12,15 @@ app.http("VoteProject", {
     if (preflight) return preflight;
 
     try {
-      // FIX 3: auth prima di consumare il body
       const user = await withAuth(request, context);
       requireRole(user, "admin", "user");
 
       const body = await request.json();
-
       const { project_id, score } = body;
-      // FIX 5: trim su score_reasoning prima di validare e salvare
       const score_reasoning = body.score_reasoning?.trim();
       const user_id = user.oid;
 
+      // validazione input
       if (
         !project_id ||
         score === undefined ||
@@ -31,13 +29,12 @@ app.http("VoteProject", {
       ) {
         return withCors({
           status: 400,
-          headers: { "Content-Type": "application/json" }, // FIX 4
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ error: "Missing required fields" }),
         });
       }
 
       const numericScore = Number(score);
-
       if (
         !Number.isInteger(numericScore) ||
         numericScore < 1 ||
@@ -45,7 +42,7 @@ app.http("VoteProject", {
       ) {
         return withCors({
           status: 400,
-          headers: { "Content-Type": "application/json" }, // FIX 4
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             error: "Score must be an integer between 1 and 5",
           }),
@@ -57,18 +54,19 @@ app.http("VoteProject", {
       await transaction.begin();
 
       try {
+        // 1️⃣ verifica progetto
         const project = await transaction
           .request()
           .input("project_id", project_id)
           .query(
-            `SELECT project_status FROM Projects WHERE project_id = @project_id`
+            "SELECT project_status FROM Projects WHERE project_id = @project_id"
           );
 
         if (project.recordset.length === 0) {
           await transaction.rollback();
           return withCors({
             status: 404,
-            headers: { "Content-Type": "application/json" }, // FIX 4
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ error: "Project not found" }),
           });
         }
@@ -77,11 +75,38 @@ app.http("VoteProject", {
           await transaction.rollback();
           return withCors({
             status: 400,
-            headers: { "Content-Type": "application/json" }, // FIX 4
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ error: "Voting closed" }),
           });
         }
 
+        // 2️⃣ verifica utente — FIX: transaction + user_id corretto
+        const userCheck = await transaction
+          .request()
+          .input("user_id", user_id)
+          .query(
+            "SELECT user_id, user_status FROM Users WHERE user_id = @user_id"
+          );
+
+        if (userCheck.recordset.length === 0) {
+          await transaction.rollback(); // FIX: rollback aggiunto
+          return withCors({
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ error: "User not found" }),
+          });
+        }
+
+        if (userCheck.recordset[0].user_status !== "Active") {
+          await transaction.rollback(); // FIX: rollback aggiunto
+          return withCors({
+            status: 403,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ error: "User not active" }),
+          });
+        }
+
+        // 3️⃣ verifica voto duplicato
         const voteCheck = await transaction
           .request()
           .input("project_id", project_id)
@@ -94,11 +119,12 @@ app.http("VoteProject", {
           await transaction.rollback();
           return withCors({
             status: 409,
-            headers: { "Content-Type": "application/json" }, // FIX 4
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ error: "Already voted" }),
           });
         }
 
+        // 4️⃣ inserisce il voto
         const result = await transaction
           .request()
           .input("project_id", project_id)
@@ -114,12 +140,12 @@ app.http("VoteProject", {
 
         return withCors({
           status: 201,
-          headers: { "Content-Type": "application/json" }, // FIX 4
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ vote: result.recordset[0] }),
         });
-      } catch (err) {
+      } catch (txErr) {
         await transaction.rollback();
-        throw err;
+        throw txErr;
       }
     } catch (err) {
       context.error(err);
@@ -127,12 +153,11 @@ app.http("VoteProject", {
       if (err.message === "FORBIDDEN") {
         return withCors({
           status: 403,
-          headers: { "Content-Type": "application/json" }, // FIX 4
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ error: "Forbidden" }),
         });
       }
 
-      // FIX 1: gestione esplicita degli errori di autenticazione → 401
       if (
         err.message === "NO_AUTH_HEADER" ||
         err.message === "INVALID_TOKEN" ||
@@ -148,7 +173,7 @@ app.http("VoteProject", {
 
       return withCors({
         status: 500,
-        headers: { "Content-Type": "application/json" }, // FIX 4
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ error: "Internal server error" }),
       });
     }
