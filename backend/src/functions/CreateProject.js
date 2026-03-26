@@ -86,7 +86,7 @@ app.http("CreateProject", {
         .input("project_status", cleaned.project_status)
         .input("notes", cleaned.notes)
         .input("attachments_link", cleaned.attachments_link)
-        .input("project_visibility", cleaned.project_visibility)
+        .input("project_visibility", "active")
         .input("innovation_area", cleaned.innovation_area).query(`
           INSERT INTO Projects (
             project_id,

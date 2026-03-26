@@ -1,11 +1,10 @@
 const { app } = require("@azure/functions");
 const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
-const validateToken = require("../auth/validateToken.js");
 const withAuth = require("../auth/withAuth.js");
 const requireRole = require("../auth/requireRole.js");
 
-app.http("GetProjects", {
+app.http("GetAllUsers", {
   methods: ["GET", "OPTIONS"],
   authLevel: "anonymous",
   handler: async (request, context) => {
@@ -15,28 +14,23 @@ app.http("GetProjects", {
 
     try {
       const user = await withAuth(request, context);
-      requireRole(user, "admin", "user");
+      requireRole(user, "admin");
       const pool = await getConnection();
+
       const result = await pool.request().query(`
-        SELECT 
-          project_id,
-          project_name,
-          project_code,
-          region,
-          market_segment,
-          project_phase,
-          project_status,
-          notes,
-          attachments_link,
-          project_visibility,
-          innovation_area,
-          created_at
-        FROM Projects
-        `);
+            SELECT 
+              user_id,
+              user_name,
+              email,
+              role,
+              user_status,
+              department
+            FROM Users
+          `);
 
       return withCors({
         status: 200,
-        body: JSON.stringify({ projects: result.recordset }),
+        body: JSON.stringify({ users: result.recordset }),
       });
     } catch (err) {
       console.error("Function error:", err);
