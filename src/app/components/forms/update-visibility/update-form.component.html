@@ -2,10 +2,16 @@
 <div class="main">
     <div class="form-container">
 
-        <form [formGroup]="votingForm" (ngSubmit)="onSubmit()" class="voting-form">
+        <form [formGroup]="projectStatusForm" (ngSubmit)="onSubmit()" class="voting-form">
             <div class="form-group">
                 <label>Project Code*</label>
-                <input type="text" formControlName="projectCode" />
+                <div class="code-input-wrapper">
+                    <input type="text" formControlName="projectCode" (keydown.enter)="$event.preventDefault(); searchProject()" />
+                    <button type="button" class="search-btn" (click)="searchProject()" [disabled]="isSearching">
+                        <span *ngIf="!isSearching">🔍</span>
+                        <span *ngIf="isSearching">⏳</span>
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">
@@ -16,22 +22,17 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                    <label>Project Visibility*</label>
-                    <div class="radio-buttons-container">
-                        <div class="radio-label-container">
-                            <input type="radio" formControlName="projectVisibility" value="active" />
-                            <label for="active">Active</label>
-                        </div>
-                        <div class="radio-label-container">
-                            <input type="radio" formControlName="projectVisibility" value="inactive" />
-                            <label for="inactive">Inactive</label>
-                        </div>
-                    </div>
+            <div class="form-group" *ngIf="currentProjectId">
+                <label>Resulting Visibility</label>
+                <div class="visibility-hint" [class.active]="getVisibility() === 'active'"
+                    [class.inactive]="getVisibility() === 'inactive'">
+                    {{ getVisibilityLabel() }}
+                </div>
             </div>
-
             <div class="button-container">
-                <button type="submit" [disabled]="votingForm.invalid">Submit</button>
+                <button type="submit" [disabled]="projectStatusForm.invalid || isSubmitting || !currentProjectId">
+                    {{ isSubmitting ? 'Saving...' : 'Submit' }}
+                </button>
             </div>
         </form>
     </div>

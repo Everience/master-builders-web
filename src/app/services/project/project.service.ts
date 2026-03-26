@@ -36,9 +36,9 @@ export class ProjectService {
     switchMap(headers => this.http.get(`${this.baseUrl}/GetProjectByCode`, {
       headers,
       params: { project_code: projectCode, code: this.key }
-    }))
-  );
-}
+      }))
+    );
+  }
 
   getProjects(): Observable<any> {
     return this.getAuthHeaders().pipe(
@@ -62,18 +62,18 @@ export class ProjectService {
     );
   }
 
-    createProject(payload: {
-      project_name: string;
-      project_code: string;
-      region: string;
-      market_segment: string;
-      project_phase: string;
-      project_status: string;
-      notes: string;
-      attachments_link: string;
-      project_visibility: string;
-      innovation_area: string;
-      }): Observable<any> {
+  createProject(payload: {
+    project_name: string;
+    project_code: string;
+    region: string;
+    market_segment: string;
+    project_phase: string;
+    project_status: string;
+    notes: string;
+    attachments_link: string;
+    project_visibility: string;
+    innovation_area: string;
+  }): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.post(
         `${this.baseUrl}/CreateProject`,
@@ -104,4 +104,18 @@ export class ProjectService {
       ))
     );
   }
+
+  changeProjectStatus(payload: {
+    project_id: string;
+    status: string;
+  }): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.post(
+        `${this.baseUrl}/ChangeProjectStatus`,
+        payload,
+        { headers, params: { code: this.key } }
+      ))
+    );
+  }
+
 }
