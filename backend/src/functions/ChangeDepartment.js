@@ -18,7 +18,7 @@ app.http("ChangeUserDepartment", {
       const body = await request.json();
       const { email, department, new_department } = body;
 
-      // VALIDAZIONE
+      // ✅ VALIDAZIONE
       if (!email || !department || !new_department) {
         return withCors({
           status: 400,
@@ -30,28 +30,46 @@ app.http("ChangeUserDepartment", {
 
       const pool = await getConnection();
       const transaction = pool.transaction();
-      await transaction.begin();
+
+      let transactionStarted = false;
 
       try {
+        await transaction.begin();
+        transactionStarted = true;
+
+        // 🔍 Controllo utente esistente
         const userResult = await transaction
           .request()
           .input("email", email)
           .input("department", department).query(`
-            SELECT TOP 1 *
+            SELECT TOP 1 user_name
             FROM Users
             WHERE email = @email AND department = @department
           `);
 
         if (userResult.recordset.length === 0) {
-          await transaction.rollback();
-          return withCors({
-            status: 404,
-            body: JSON.stringify({
-              error: "User not found in the original department",
-            }),
-          });
+          throw new Error("USER_NOT_FOUND");
         }
 
+        const user_name = userResult.recordset[0].user_name;
+
+        // 🔍 Controllo duplicato nel nuovo dipartimento
+        const duplicateCheck = await transaction
+          .request()
+          .input("email", email)
+          .input("new_department", new_department).query(`
+            SELECT TOP 1 1
+            FROM Users
+            WHERE email = @email 
+              AND department = @new_department 
+              AND user_status = 'Active'
+          `);
+
+        if (duplicateCheck.recordset.length > 0) {
+          throw new Error("user already exist in new department");
+        }
+
+        // 🔄 Disattiva utente nel vecchio dipartimento
         await transaction
           .request()
           .input("email", email)
@@ -61,33 +79,23 @@ app.http("ChangeUserDepartment", {
             WHERE email = @email AND department = @department
           `);
 
-        const duplicateCheck = await transaction
-          .request()
-          .input("email", email)
-          .input("new_department", new_department).query(`
-            SELECT TOP 1 *
-            FROM Users
-            WHERE email = @email AND department = @new_department AND user_status = 'Active'
-          `);
+        // ⚠️ FIX: usare new_department
+        const new_user_id =
+          email.trim().toLowerCase() +
+          "|" +
+          new_department.trim().toLowerCase();
 
-        if (duplicateCheck.recordset.length > 0) {
-          await transaction.rollback();
-          return withCors({
-            status: 400,
-            body: JSON.stringify({
-              error: "User already active in target department",
-            }),
-          });
-        }
-
+        // ➕ Inserisci nuovo record
         const insertResult = await transaction
           .request()
+          .input("new_user_id", new_user_id)
           .input("email", email)
+          .input("user_name", user_name)
           .input("department", new_department)
           .input("status", "Active").query(`
-            INSERT INTO Users (user_id, email, department, user_status)
+            INSERT INTO Users (user_id_internal, email, user_name, department, user_status)
             OUTPUT INSERTED.*
-            VALUES (NEWID(), @email, @department, @status)
+            VALUES (@new_user_id, @email, @user_name, @department, @status)
           `);
 
         await transaction.commit();
@@ -101,23 +109,52 @@ app.http("ChangeUserDepartment", {
           }),
         });
       } catch (err) {
-        await transaction.rollback();
+        if (transactionStarted) {
+          try {
+            await transaction.rollback();
+          } catch (rollbackErr) {
+            console.error("Rollback già eseguito:", rollbackErr.message);
+          }
+        }
+
+        // 🎯 Errori gestiti
+        if (err.message === "USER_NOT_FOUND") {
+          return withCors({
+            status: 404,
+            body: JSON.stringify({
+              error: "User not found in the original department",
+            }),
+          });
+        }
+
+        if (err.message === "USER_ALREADY_EXISTS") {
+          return withCors({
+            status: 400,
+            body: JSON.stringify({
+              error: "User already active in target department",
+            }),
+          });
+        }
+
         throw err;
       }
     } catch (err) {
       context.error(err);
+
       if (err.message === "NO_AUTH_HEADER" || err.message === "INVALID_TOKEN") {
         return withCors({
           status: 401,
           body: JSON.stringify({ error: "Unauthorized" }),
         });
       }
+
       if (err.message === "FORBIDDEN") {
         return withCors({
           status: 403,
           body: JSON.stringify({ error: "Forbidden" }),
         });
       }
+
       return withCors({
         status: 500,
         body: JSON.stringify({

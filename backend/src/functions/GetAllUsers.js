@@ -19,7 +19,7 @@ app.http("GetAllUsers", {
 
       const result = await pool.request().query(`
             SELECT 
-              user_id,
+              user_id_internal,
               user_name,
               email,
               role,

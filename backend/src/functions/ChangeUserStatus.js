@@ -57,12 +57,12 @@ app.http("ChangeUserStatus", {
 
       const updateResult = await pool
         .request()
-        .input("user_id", targetUser.user_id)
+        .input("user_id_internal", targetUser.user_id_internal)
         .input("status", status).query(`
           UPDATE Users
           SET user_status = @status
           OUTPUT INSERTED.*
-          WHERE user_id = @user_id
+          WHERE user_id_internal = @user_id_internal
         `);
 
       return withCors({

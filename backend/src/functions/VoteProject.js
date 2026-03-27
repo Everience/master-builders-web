@@ -18,7 +18,8 @@ app.http("VoteProject", {
       const body = await request.json();
       const { project_id, score } = body;
       const score_reasoning = body.score_reasoning?.trim();
-      const user_id = user.oid;
+
+      const user_email = user.preferred_username;
 
       // validazione input
       if (
@@ -80,39 +81,47 @@ app.http("VoteProject", {
           });
         }
 
-        // 2️⃣ verifica utente — FIX: transaction + user_id corretto
+        // 2️⃣ verifica utente con email e stato Active
         const userCheck = await transaction
           .request()
-          .input("user_id", user_id)
+          .input("user_email", user_email)
           .query(
-            "SELECT user_id, user_status FROM Users WHERE user_id = @user_id"
+            `SELECT user_id_internal, user_status 
+              FROM Users 
+              WHERE email = @user_email AND user_status = 'Active'`
           );
 
+        // Se non esiste nessun utente attivo
         if (userCheck.recordset.length === 0) {
-          await transaction.rollback(); // FIX: rollback aggiunto
+          await transaction.rollback();
           return withCors({
             status: 404,
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ error: "User not found" }),
+            body: JSON.stringify({ error: "User non trovato o non esiste" }),
           });
         }
 
-        if (userCheck.recordset[0].user_status !== "Active") {
-          await transaction.rollback(); // FIX: rollback aggiunto
+        // Se ci sono più utenti attivi con la stessa email
+        if (userCheck.recordset.length > 1) {
+          await transaction.rollback();
           return withCors({
-            status: 403,
+            status: 409, // conflitto
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ error: "User not active" }),
+            body: JSON.stringify({
+              error: "User con piu department attivi",
+            }),
           });
         }
+
+        const user_id_internal = userCheck.recordset[0].user_id_internal;
 
         // 3️⃣ verifica voto duplicato
         const voteCheck = await transaction
           .request()
           .input("project_id", project_id)
-          .input("user_id", user_id).query(`
+          .input("user_id_internal", user_id_internal).query(`
             SELECT vote_id FROM Voting_Results
-            WHERE project_id = @project_id AND user_id = @user_id
+            WHERE project_id = @project_id AND user_id_internal = @user_id_internal
           `);
 
         if (voteCheck.recordset.length > 0) {
@@ -128,12 +137,12 @@ app.http("VoteProject", {
         const result = await transaction
           .request()
           .input("project_id", project_id)
-          .input("user_id", user_id)
+          .input("user_id_internal", user_id_internal)
           .input("score", numericScore)
           .input("score_reasoning", score_reasoning).query(`
-            INSERT INTO Voting_Results (project_id, user_id, score, score_reasoning, voted_at)
+            INSERT INTO Voting_Results (project_id, user_id_internal, score, score_reasoning, voted_at)
             OUTPUT INSERTED.*
-            VALUES (@project_id, @user_id, @score, @score_reasoning, GETDATE())
+            VALUES (@project_id, @user_id_internal, @score, @score_reasoning, GETDATE())
           `);
 
         await transaction.commit();
