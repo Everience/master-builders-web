@@ -86,7 +86,7 @@ app.http("VoteProject", {
           .request()
           .input("user_email", user_email)
           .query(
-            `SELECT user_id, user_status 
+            `SELECT user_id_internal, user_status 
               FROM Users 
               WHERE email = @user_email AND user_status = 'Active'`
           );
@@ -113,15 +113,15 @@ app.http("VoteProject", {
           });
         }
 
-        const user_id = userCheck.recordset[0].user_id;
+        const user_id_internal = userCheck.recordset[0].user_id_internal;
 
         // 3️⃣ verifica voto duplicato
         const voteCheck = await transaction
           .request()
           .input("project_id", project_id)
-          .input("user_id", user_id).query(`
+          .input("user_id_internal", user_id_internal).query(`
             SELECT vote_id FROM Voting_Results
-            WHERE project_id = @project_id AND user_id = @user_id
+            WHERE project_id = @project_id AND user_id_internal = @user_id_internal
           `);
 
         if (voteCheck.recordset.length > 0) {
@@ -137,12 +137,12 @@ app.http("VoteProject", {
         const result = await transaction
           .request()
           .input("project_id", project_id)
-          .input("user_id", user_id)
+          .input("user_id_internal", user_id_internal)
           .input("score", numericScore)
           .input("score_reasoning", score_reasoning).query(`
-            INSERT INTO Voting_Results (project_id, user_id, score, score_reasoning, voted_at)
+            INSERT INTO Voting_Results (project_id, user_id_internal, score, score_reasoning, voted_at)
             OUTPUT INSERTED.*
-            VALUES (@project_id, @user_id, @score, @score_reasoning, GETDATE())
+            VALUES (@project_id, @user_id_internal, @score, @score_reasoning, GETDATE())
           `);
 
         await transaction.commit();
