@@ -42,71 +42,71 @@ export class UpdateProjectComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.projectForm = this.fb.group({
-      projectCode:    ['', Validators.required],
-      projectName:    ['', Validators.required],
-      projectStatus:  ['', Validators.required],
-      innovationArea: ['', Validators.required],
-      region:         ['', Validators.required],
-      marketSegment:  ['', Validators.required],
-      projectPhase:   ['', Validators.required],
-      notes:          [''],
-      attachmentsLink:[''],
-    });
-  }
+  this.projectForm = this.fb.group({
+    projectCode:     ['', Validators.required],
+    projectName:     ['', Validators.required],
+    projectStatus:   ['', Validators.required],
+    innovationArea:  ['', Validators.required],
+    region:          ['', Validators.required],
+    marketSegment:   ['', Validators.required],
+    projectPhase:    ['', Validators.required],
+    notes:           ['', Validators.required],
+    attachmentsLink: [''],
+  });
+}
 
-  searchProject() {
-    const code = this.projectForm.get('projectCode')?.value?.trim();
-    if (!code) return;
+searchProject() {
+  const code = this.projectForm.get('projectCode')?.value?.trim();
+  if (!code) return;
 
-    this.isSearching = true;
+  this.isSearching = true;
 
-    this.projectService.getProjectByCode(code).subscribe({
-      next: (res) => {
-        const p = res.project;
-        this.currentProjectId = p.project_id;
-        console.log(this.currentProjectId)
-        this.projectForm.patchValue({
-          projectName:    p.project_name,
-          projectStatus:  p.project_status,
-          innovationArea: p.Innovation_area,
-          region:         p.region,
-          marketSegment:  p.market_segment,
-          notes:          p.notes,
-          projectPhase:   p.project_phase,
-          attachmentsLink: p.attachments_link || '',
-        }, { emitEvent: false });
+  this.projectService.getProjectByCode(code).subscribe({
+    next: (res) => {
+      const p = res.project;
+      this.currentProjectId = p.project_id;
 
-        ['projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes', 'projectPhase']
-          .forEach(field => this.projectForm.get(field)!.disable({ emitEvent: false }));
+      this.projectForm.patchValue({
+        projectName:     p.project_name,
+        projectStatus:   p.project_status,
+        innovationArea:  p.Innovation_area,
+        region:          p.region,
+        marketSegment:   p.market_segment,
+        notes:           p.notes,
+        projectPhase:    p.project_phase,
+        attachmentsLink: p.attachments_link || '',
+      }, { emitEvent: false });
+
+      ['projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment']
+        .forEach(field => this.projectForm.get(field)!.disable({ emitEvent: false }));
 
         this.isSearching = false;
+        this.toast.info('Progetto trovato. Modifica i campi necessari.');
       },
-      error: (err) => {
-        console.error('Project not found:', err);
-        this.clearAutofilledFields();
+      error: (err: any) => {
         this.isSearching = false;
-        this.handleError(err); 
+        this.currentProjectId = null;
+        this.clearAutofilledFields();
+        this.handleError(err);
       }
     });
   }
 
   clearAutofilledFields() {
-    ['projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes', 'projectPhase']
+    ['projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment']
       .forEach(field => this.projectForm.get(field)!.enable({ emitEvent: false }));
 
     this.projectForm.patchValue({
-      projectName:    '',
-      projectStatus:  '',
-      innovationArea: '',
-      region:         '',
-      marketSegment:  '',
-      notes:          '',
-      projectPhase:   '',
-      attachmentsLink:'',
+      projectName:     '',
+      projectStatus:   '',
+      innovationArea:  '',
+      region:          '',
+      marketSegment:   '',
+      notes:           '',
+      projectPhase:    '',
+      attachmentsLink: '',
     }, { emitEvent: false });
   }
-
   onSubmit() {
     if (this.projectForm.invalid) {
       this.projectForm.markAllAsTouched();

@@ -53,19 +53,19 @@
             </div>
             
             <div class="form-group">
-                <label>Update Notes</label>
+                <label>Update Notes* <span class="editable-hint">editable</span></label>
                 <textarea formControlName="notes" rows="3"></textarea>
             </div>
 
             <div class="form-group">
-                <label>New Project Phase</label>
+                <label>New Project Phase* <span class="editable-hint">editable</span></label>
                 <select formControlName="projectPhase">
                     <option value="">Select phase</option>
                     <option *ngFor="let phase of projectPhases" [value]="phase">{{ phase }}</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Attachments Link</label>
+                <label>Attachments Link <span class="editable-hint">editable · optional</span></label>
                 <input type="text" formControlName="attachmentsLink" placeholder="E.g.: https://netecoorg.sharepoint.com/..." />
             </div>
 

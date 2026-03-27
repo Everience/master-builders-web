@@ -25,11 +25,38 @@ export class UserService {
     );
   }
 
-  changeUserStatus(userId: string, status: 'Active' | 'Inactive'): Observable<any> {
+  getAllUsers(): Observable<any> {
     return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.post(
-        `${this.baseUrl}/ChangeUserStatusById`,
-        { user_id: userId, status },
+      switchMap(headers => this.http.get(`${this.baseUrl}/GetAllUsers`, {
+        headers,
+        params: { code: this.key }
+      }))
+    );
+  }
+
+  changeUserStatus(payload: {
+    email: string;
+    department: string;
+    status: 'Active' | 'Inactive';
+  }): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.put(  // ✅ PUT not POST
+        `${this.baseUrl}/ChangeUserStatus`,
+        payload,
+        { headers, params: { code: this.key } }
+      ))
+    );
+  }
+
+  changeUserDepartment(payload: {
+    email: string;
+    department: string;
+    new_department: string;
+  }): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.put(
+        `${this.baseUrl}/ChangeUserDepartment`,
+        payload,
         { headers, params: { code: this.key } }
       ))
     );
