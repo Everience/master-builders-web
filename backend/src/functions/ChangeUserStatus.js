@@ -12,14 +12,15 @@ app.http("ChangeUserStatus", {
     if (preflight) return preflight;
 
     try {
+      // 🔑 Autenticazione e autorizzazione
       const user = await withAuth(request, context);
       requireRole(user, "admin");
 
       const body = await request.json();
       const { email, department, status } = body;
 
-      // VALIDAZIONE
-      if (!email || !department) {
+      //validazioni
+      if (!email || !department || status) {
         return withCors({
           status: 400,
           body: JSON.stringify({ error: "email and department are required" }),
@@ -37,6 +38,7 @@ app.http("ChangeUserStatus", {
 
       const pool = await getConnection();
 
+      //trovo user
       const userResult = await pool
         .request()
         .input("email", email)
@@ -54,22 +56,25 @@ app.http("ChangeUserStatus", {
       }
 
       const targetUser = userResult.recordset[0];
+      const user_id_internal = targetUser.user_id_internal;
 
-      const request = transaction.request();
+      const transaction = pool.transaction();
+      await transaction.begin();
+      const txRequest = transaction.request();
 
       if (status === "Active") {
-        await request.input("user_id_internal", targetUser.user_id_internal)
-          .query(`
+        await txRequest
+          .input("email", email)
+          .input("exclude_id", user_id_internal).query(`
             UPDATE Users
             SET user_status = 'Inactive'
-            WHERE user_id_internal = @user_id_internal
+            WHERE email = @email AND user_id_internal <> @exclude_id
           `);
       }
 
-      // Aggiorna l'utente target
-      const updateResult = await request
+      const updateResult = await txRequest
         .input("status", status)
-        .input("user_id_internal", targetUser.user_id_internal).query(`
+        .input("user_id_internal", user_id_internal).query(`
           UPDATE Users
           SET user_status = @status
           OUTPUT INSERTED.*
@@ -77,16 +82,6 @@ app.http("ChangeUserStatus", {
         `);
 
       await transaction.commit();
-
-      /*const updateResult = await pool
-        .request()
-        .input("user_id_internal", targetUser.user_id_internal)
-        .input("status", status).query(`
-          UPDATE Users
-          SET user_status = @status
-          OUTPUT INSERTED.*
-          WHERE user_id_internal = @user_id_internal
-        `);*/
 
       return withCors({
         status: 200,
@@ -98,18 +93,21 @@ app.http("ChangeUserStatus", {
       });
     } catch (err) {
       context.error(err);
+
       if (err.message === "NO_AUTH_HEADER" || err.message === "INVALID_TOKEN") {
         return withCors({
           status: 401,
           body: JSON.stringify({ error: "Unauthorized" }),
         });
       }
+
       if (err.message === "FORBIDDEN") {
         return withCors({
           status: 403,
           body: JSON.stringify({ error: "Forbidden" }),
         });
       }
+
       return withCors({
         status: 500,
         body: JSON.stringify({
