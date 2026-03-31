@@ -55,7 +55,30 @@ app.http("ChangeUserStatus", {
 
       const targetUser = userResult.recordset[0];
 
-      const updateResult = await pool
+      const request = transaction.request();
+
+      if (status === "Active") {
+        await request.input("user_id_internal", targetUser.user_id_internal)
+          .query(`
+            UPDATE Users
+            SET user_status = 'Inactive'
+            WHERE user_id_internal = @user_id_internal
+          `);
+      }
+
+      // Aggiorna l'utente target
+      const updateResult = await request
+        .input("status", status)
+        .input("user_id_internal", targetUser.user_id_internal).query(`
+          UPDATE Users
+          SET user_status = @status
+          OUTPUT INSERTED.*
+          WHERE user_id_internal = @user_id_internal
+        `);
+
+      await transaction.commit();
+
+      /*const updateResult = await pool
         .request()
         .input("user_id_internal", targetUser.user_id_internal)
         .input("status", status).query(`
@@ -63,7 +86,7 @@ app.http("ChangeUserStatus", {
           SET user_status = @status
           OUTPUT INSERTED.*
           WHERE user_id_internal = @user_id_internal
-        `);
+        `);*/
 
       return withCors({
         status: 200,
