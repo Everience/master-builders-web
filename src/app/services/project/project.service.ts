@@ -62,6 +62,20 @@ export class ProjectService {
     );
   }
 
+  createProjectWithFiles(formData: FormData): Observable<any> {
+  return this.getAuthHeaders().pipe(
+    switchMap(headers => this.http.post(
+      `${this.baseUrl}/CreateProjectFiles`,
+      formData,
+      {
+        //only Authorization header, no content type, browser sets it automatically
+        headers,
+        params: { code: this.key }
+      }
+    ))
+  );
+}
+
   createProject(payload: {
     project_name: string;
     project_code: string;

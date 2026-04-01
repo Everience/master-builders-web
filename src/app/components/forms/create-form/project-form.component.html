@@ -61,15 +61,24 @@
       </div>
 
       <div class="form-group">
-        <label>Attachments <br> <span style="font-size: 0.75rem;">You can upload a maximum of 10files, up to 10MB
-            each</span></label>
-        <input type="text" formControlName="attachmentsLink" placeholder="E.g.: https://netecoorg.sharepoint.com/..." />
+        <label>
+          Attachments
+          <br>
+          <span style="font-size: 0.75rem;">Max 10 files, up to 10MB each — PDF, Word, JPG supported</span>
+        </label>
+        <input type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" (change)="onFileSelected($event)" />
         <ul class="file-list" *ngIf="uploadedFiles.length">
           <li *ngFor="let file of uploadedFiles; let i = index">
             {{ file.name }}
+            <span style="font-size: 0.75rem; color: #6b7a99;">
+              ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)
+            </span>
             <button type="button" (click)="removeFile(i)">Remove</button>
           </li>
         </ul>
+        <p *ngIf="uploadedFiles.length === 0" style="font-size: 0.8rem; color: #6b7a99; margin-top: 6px;">
+          No files selected
+        </p>
       </div>
 
       <div class="button-container">
