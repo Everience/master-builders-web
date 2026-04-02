@@ -14,7 +14,7 @@
                 </div>
 
                 <div class="login-card__body">
-                    <button class="btn-microsoft">
+                    <button class="btn-microsoft" (click)="login()" [disabled]="isLoading">
                         <span class="btn-microsoft__logo" *ngIf="!isLoading">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <rect x="1" y="1" width="8.5" height="8.5" fill="#F25022" />

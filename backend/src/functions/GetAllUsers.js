@@ -8,7 +8,7 @@ app.http("GetAllUsers", {
   methods: ["GET", "OPTIONS"],
   authLevel: "anonymous",
   handler: async (request, context) => {
-    // 👉 gestione preflight CORS
+    //cors preflight
     const preflight = handleCors(request);
     if (preflight) return preflight;
 

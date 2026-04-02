@@ -99,3 +99,40 @@
         }
     }
 }
+
+.code-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.code-input-wrapper input {
+    flex: 1;
+}
+
+.search-btn {
+    padding: 9px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-radius: 5px;
+    background-color: transparent;
+    border: 1px solid #acacad;
+}
+
+.search-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.editable-hint {
+    font-size: 0.5rem;
+    font-weight: 500;
+    color: #003087;
+    background: #e8eef7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-left: 6px;
+    vertical-align: middle;
+}

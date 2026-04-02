@@ -13,8 +13,16 @@
 
       <div class="form-group">
         <label>Project Name*</label>
-        <input type="text" formControlName="projectName" />
+        <select formControlName="projectName" (change)="onProjectSelected($event)">
+          <option value="">
+            {{ isLoadingProjects ? 'Loading projects...' : 'Select a project' }}
+          </option>
+          <option *ngFor="let project of allProjects" [value]="project.project_name">
+            {{ project.project_name }}
+          </option>
+        </select>
       </div>
+
 
       <div class="form-group">
         <label>Project Status*</label>
