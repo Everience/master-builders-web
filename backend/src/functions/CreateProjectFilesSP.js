@@ -9,6 +9,7 @@ const stream = require("stream");
 const {
   uploadFileToSharePoint,
   deleteFileFromSharePoint,
+  getFolderUrl,
 } = require("../../uploadFileToSharePoint.js");
 // ✅ Rimosso import inutilizzato: getGraphClient
 
@@ -159,15 +160,21 @@ app.http("CreateProjectFilesSP", {
               INSERT INTO Project_Files (project_id, filename, blob_url, created_by)
               VALUES (@project_id, @filename, @blob_url, @created_by)
             `);
+        }
+
+        let folderUrl = null;
+
+        if (uploadedFiles.length > 0) {
+          folderUrl = await getFolderUrl(projectId);
 
           await transaction
             .request()
             .input("project_id", projectId)
-            .input("attachments_link", url).query(`
-              UPDATE  Projects 
-              SET  attachments_link = @attachments_link
+            .input("attachments_link", folderUrl).query(`
+              UPDATE Projects
+              SET attachments_link = @attachments_link
               WHERE project_id = @project_id
-            `);
+          `);
         }
       } catch (err) {
         // ✅ Rollback solo dei file già caricati con successo su SharePoint

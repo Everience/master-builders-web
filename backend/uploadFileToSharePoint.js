@@ -31,4 +31,20 @@ async function deleteFileFromSharePoint(projectId, filename) {
     .delete();
 }
 
-module.exports = { uploadFileToSharePoint, deleteFileFromSharePoint };
+async function getFolderUrl(projectId) {
+  const client = await getGraphClient();
+
+  const res = await client
+    .api(
+      `/sites/${process.env.SHAREPOINT_SITE_ID}/drives/${process.env.SHAREPOINT_DRIVE_ID}/root:/${projectId}`
+    )
+    .get();
+
+  return res.webUrl;
+}
+
+module.exports = {
+  uploadFileToSharePoint,
+  deleteFileFromSharePoint,
+  getFolderUrl,
+};
