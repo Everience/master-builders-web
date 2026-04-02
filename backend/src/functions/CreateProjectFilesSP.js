@@ -159,6 +159,15 @@ app.http("CreateProjectFilesSP", {
               INSERT INTO Project_Files (project_id, filename, blob_url, created_by)
               VALUES (@project_id, @filename, @blob_url, @created_by)
             `);
+
+          await transaction
+            .request()
+            .input("project_id", projectId)
+            .input("attachments_link", url).query(`
+              UPDATE  Projects 
+              SET  attachments_link = @attachments_link
+              WHERE project_id = @project_id
+            `);
         }
       } catch (err) {
         // ✅ Rollback solo dei file già caricati con successo su SharePoint
