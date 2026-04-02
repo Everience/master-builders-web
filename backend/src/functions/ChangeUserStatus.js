@@ -65,10 +65,10 @@ app.http("ChangeUserStatus", {
       if (status === "Active") {
         await txRequest
           .input("email", email)
-          .input("exclude_id", user_id_internal).query(`
+          .input("user_id_internal", user_id_internal).query(`
             UPDATE Users
             SET user_status = 'Inactive'
-            WHERE email = @email AND user_id_internal <> @exclude_id
+            WHERE email = @email AND user_id_internal <> @user_id_internal
           `);
       }
 
