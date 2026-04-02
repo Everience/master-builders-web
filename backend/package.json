@@ -9,8 +9,11 @@
   },
   "dependencies": {
     "@azure/functions": "^4.0.0",
+    "@azure/identity": "^4.13.1",
     "@azure/storage-blob": "^12.31.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "busboy": "^1.6.0",
+    "isomorphic-fetch": "^3.0.0",
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^4.0.1",
     "mssql": "^12.2.0"
