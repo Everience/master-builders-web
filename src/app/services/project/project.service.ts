@@ -65,7 +65,7 @@ export class ProjectService {
   createProjectWithFiles(formData: FormData): Observable<any> {
   return this.getAuthHeaders().pipe(
     switchMap(headers => this.http.post(
-      `${this.baseUrl}/CreateProjectFiles`,
+      `${this.baseUrl}/CreateProjectFilesSP`,
       formData,
       {
         //only Authorization header, no content type, browser sets it automatically
