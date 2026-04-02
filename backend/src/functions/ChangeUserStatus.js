@@ -19,7 +19,7 @@ app.http("ChangeUserStatus", {
       const body = await request.json();
       const { email, department, status } = body;
 
-      //validazioni
+      // Validazioni
       if (!email || !department || !status) {
         return withCors({
           status: 400,
@@ -27,7 +27,7 @@ app.http("ChangeUserStatus", {
         });
       }
 
-      if (!status || !["Active", "Inactive"].includes(status)) {
+      if (!["Active", "Inactive"].includes(status)) {
         return withCors({
           status: 400,
           body: JSON.stringify({
@@ -38,7 +38,7 @@ app.http("ChangeUserStatus", {
 
       const pool = await getConnection();
 
-      //trovo user
+      // Trovo user
       const userResult = await pool
         .request()
         .input("email", email)
@@ -60,37 +60,45 @@ app.http("ChangeUserStatus", {
 
       const transaction = pool.transaction();
       await transaction.begin();
-      const txRequest = transaction.request();
 
-      if (status === "Active") {
-        await txRequest
-          .input("email", email)
+      try {
+        // Se si attiva un utente, disattivo gli altri con la stessa email
+        if (status === "Active") {
+          await transaction
+            .request()
+            .input("email", email)
+            .input("user_id_internal", user_id_internal).query(`
+              UPDATE Users
+              SET user_status = 'Inactive'
+              WHERE email = @email AND user_id_internal <> @user_id_internal
+            `);
+        }
+
+        // Aggiorno lo status dell'utente target
+        const updateResult = await transaction
+          .request()
+          .input("status", status)
           .input("user_id_internal", user_id_internal).query(`
             UPDATE Users
-            SET user_status = 'Inactive'
-            WHERE email = @email AND user_id_internal <> @user_id_internal
+            SET user_status = @status
+            OUTPUT INSERTED.*
+            WHERE user_id_internal = @user_id_internal
           `);
+
+        await transaction.commit();
+
+        return withCors({
+          status: 200,
+          body: JSON.stringify({
+            message: `User status updated to '${status}'`,
+            action: "status_updated",
+            user: updateResult.recordset[0],
+          }),
+        });
+      } catch (txErr) {
+        await transaction.rollback();
+        throw txErr;
       }
-
-      const updateResult = await txRequest
-        .input("status", status)
-        .input("user_id_internal", user_id_internal).query(`
-          UPDATE Users
-          SET user_status = @status
-          OUTPUT INSERTED.*
-          WHERE user_id_internal = @user_id_internal
-        `);
-
-      await transaction.commit();
-
-      return withCors({
-        status: 200,
-        body: JSON.stringify({
-          message: `User status updated to '${status}'`,
-          action: "status_updated",
-          user: updateResult.recordset[0],
-        }),
-      });
     } catch (err) {
       context.error(err);
 
