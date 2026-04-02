@@ -20,7 +20,7 @@ app.http("ChangeUserStatus", {
       const { email, department, status } = body;
 
       //validazioni
-      if (!email || !department || status) {
+      if (!email || !department || !status) {
         return withCors({
           status: 400,
           body: JSON.stringify({ error: "email and department are required" }),
