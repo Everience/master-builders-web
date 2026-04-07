@@ -42,10 +42,10 @@ export class VotingFormComponent implements OnInit {
   isSearching = false;
   submitError: string | null = null;
   submitSuccess = false;
+  projectDocsLink: string = ''; 
 
   constructor(private fb: FormBuilder, private router: Router, private projectService: ProjectService, private toast: ToastService, private authService: AuthService) {
     this.votingForm = this.fb.group({
-      team:          ['', Validators.required],
       projectName:   ['', Validators.required],  
       projectStatus: [''],                        
       innovationArea:[''],                        
@@ -92,6 +92,7 @@ export class VotingFormComponent implements OnInit {
     }
 
     this.currentProjectId = match.project_id;
+    this.projectDocsLink = match.attachments_link || '';
 
     this.votingForm.patchValue({
       projectStatus:  match.project_status,
