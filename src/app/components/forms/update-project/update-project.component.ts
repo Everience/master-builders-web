@@ -90,7 +90,7 @@ searchProject() {
         .forEach(field => this.projectForm.get(field)!.disable({ emitEvent: false }));
 
         this.isSearching = false;
-        this.toast.info('Progetto trovato. Modifica i campi necessari.');
+        this.toast.info('Project found. Edit the fields you want to update.');
       },
       error: (err: any) => {
         this.isSearching = false;
@@ -121,15 +121,19 @@ searchProject() {
     this.attachmentsLink = '';
   }
 
+  triggerFileInput() {
+    document.getElementById('updateFileInput')?.click();
+  }
+
   onFileSelected(event: any) {
     const selected = Array.from(event.target.files) as File[];
     for (const file of selected) {
       if (this.newFiles.length >= this.MAX_FILES) {
-        this.toast.warning(`Puoi caricare al massimo ${this.MAX_FILES} file.`);
+        this.toast.warning(`You can upload a maximum of ${this.MAX_FILES} file.`);
         break;
       }
       if (file.size > this.MAX_SIZE_MB * 1024 * 1024) {
-        this.toast.warning(`"${file.name}" supera i ${this.MAX_SIZE_MB}MB.`);
+        this.toast.warning(`"${file.name}" exceeds the ${this.MAX_SIZE_MB}MB limit.`);
         continue;
       }
       this.newFiles.push(file);
@@ -152,7 +156,7 @@ searchProject() {
       case 'png':          return '🖼️';
       case 'xls':
       case 'xlsx':         return '📊';
-      default:             return '📎';
+      default:             return '📁';
     }
   }
 
@@ -163,14 +167,14 @@ searchProject() {
     }
 
     if (!this.currentProjectId) {
-      this.toast.warning('Cerca prima un progetto tramite il codice.');
+      this.toast.warning('Please search for a project first.');
       return;
     }
 
     this.isSubmitting = true;
     const f = this.projectForm.getRawValue();
 
-    // ✅ if files selected → multipart, otherwise → JSON
+    //if files selected → multipart, otherwise → JSON
     if (this.newFiles.length > 0) {
       const formData = new FormData();
       formData.append('old_project_id',    this.currentProjectId);
@@ -224,7 +228,7 @@ searchProject() {
 
   private handleSuccess() {
     this.isSubmitting = false;
-    this.toast.success('Progetto aggiornato con successo!');
+    this.toast.success('Project updated successfully!');
     setTimeout(() => this.router.navigate(['/home']), 2000);
   }
 
@@ -233,26 +237,26 @@ searchProject() {
       case 400:
         const errors = err.error?.errors;
         if (errors) {
-          this.toast.error(`Dati non validi: ${Object.values(errors).join(' | ')}`);
+          this.toast.error(`Invalid data: ${Object.values(errors).join(' | ')}`);
         } else {
-          this.toast.error(err.error?.error || 'Dati non validi. Controlla i campi.');
+          this.toast.error(err.error?.error || 'Invalid data, please check the fields.');
         }
         break;
       case 401:
-        this.toast.error('Sessione scaduta. Effettua di nuovo il login.');
+        this.toast.error('Session expired. Please, login again.');
         setTimeout(() => this.router.navigate(['/login']), 2000);
         break;
       case 403:
-        this.toast.error('Non hai i permessi per modificare questo progetto.');
+        this.toast.error('You do not have permission to modify this project.');
         break;
       case 404:
-        this.toast.error('Nessun progetto trovato con questo codice.');
+        this.toast.error('No project found with the current code.');
         break;
       case 500:
-        this.toast.error('Errore interno al server. Riprova più tardi.');
+        this.toast.error('Internal server error. Please try again later.');
         break;
       default:
-        this.toast.error('Qualcosa è andato storto. Riprova.');
+        this.toast.error('Something went wrong. Please try again.');
     }
   }
 

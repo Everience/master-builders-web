@@ -55,11 +55,11 @@ export class ProjectFormComponent {
 
     for (const file of selected) {
       if (this.uploadedFiles.length >= this.MAX_FILES) {
-        this.toast.warning(`Puoi caricare al massimo ${this.MAX_FILES} file.`);
+        this.toast.warning(`You can upload a maximum of ${this.MAX_FILES} file.`);
         break;
       }
       if (file.size > this.MAX_SIZE_MB * 1024 * 1024) {
-        this.toast.warning(`Il file "${file.name}" supera i ${this.MAX_SIZE_MB}MB.`);
+        this.toast.warning(`The file "${file.name}" exceeds the ${this.MAX_SIZE_MB}MB limit.`);
         continue;
       }
       this.uploadedFiles.push(file);
@@ -73,6 +73,9 @@ export class ProjectFormComponent {
     this.uploadedFiles.splice(index, 1);
   }
 
+  triggerFileInput() {
+    document.getElementById('fileInput')?.click();
+  }
 
   onSubmit() {
   if (this.projectForm.invalid) {
@@ -103,7 +106,7 @@ export class ProjectFormComponent {
     this.projectService.createProjectWithFiles(formData).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.toast.success('Progetto creato con successo!');
+        this.toast.success('Project created successfully!');
         setTimeout(() => this.router.navigate(['/home']), 2000);
       },
       error: (err: any) => {
@@ -113,40 +116,32 @@ export class ProjectFormComponent {
     });
   }
 
-
   private handleError(err: any) {
-  const status = err.status;
-
-  switch (status) {
-    case 400:
-      const errors = err.error?.errors;
-      if (errors) {
-        const messages = Object.values(errors).join(' | ');
-        this.toast.error(`Dati non validi: ${messages}`);
-      } else {
-        this.toast.error('Dati non validi. Controlla i campi.');
-      }
-      break;
-
-    case 401:
-      this.toast.error('Sessione scaduta. Effettua di nuovo il login.');
-      setTimeout(() => this.router.navigate(['/login']), 2000);
-      break;
-
-    case 403:
-      this.toast.error('Non hai i permessi per creare un progetto.');
-      break;
-
-    case 409:
-      this.toast.error('Esiste già un progetto con lo stesso Project Code.');
-      break;
-
-    case 500:
-      this.toast.error('Errore interno al server. Riprova più tardi.');
-      break;
-
-    default:
-      this.toast.error('Qualcosa è andato storto. Riprova.');
+    switch (err.status) {
+      case 400:
+        const errors = err.error?.errors;
+        if (errors) {
+          const messages = Object.values(errors).join(' | ');
+          this.toast.error(`Invalid data: ${messages}`);
+        } else {
+          this.toast.error('Invalid data. Please check the fields.');
+        }
+        break;
+      case 401:
+        this.toast.error('Session expired. Please log in again.');
+        setTimeout(() => this.router.navigate(['/login']), 2000);
+        break;
+      case 403:
+        this.toast.error('You do not have permission to create a project.');
+        break;
+      case 409:
+        this.toast.error('A project with the same Project Code already exists.');
+        break;
+      case 500:
+        this.toast.error('Internal server error. Please try again later.');
+        break;
+      default:
+        this.toast.error('Something went wrong. Please try again.');
     }
   }
 

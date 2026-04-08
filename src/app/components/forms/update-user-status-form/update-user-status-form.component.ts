@@ -33,40 +33,44 @@ export class UpdateUserStatusFormComponent {
   }
     
   searchUser() {
-    const email = this.userStatusForm.get('userEmail')?.value?.trim().toLowerCase();
-    if (!email) return;
+  const email = this.userStatusForm.get('userEmail')?.value?.trim().toLowerCase();
+  if (!email) return;
 
-    this.isSearching = true;
-    this.matchedUsers = [];
-    this.currentUser = null;
-    this.clearUserFields();
+  this.isSearching = true;
+  this.matchedUsers = [];
+  this.currentUser = null;
+  this.clearUserFields();
 
-    this.userService.getAllUsers().subscribe({
-      next: (res) => {
-        const users = res.users || [];
-        this.matchedUsers = users.filter((u: any) => u.email?.toLowerCase() === email);
+  this.userService.getAllUsers().subscribe({
+    next: (res) => {
+      const users = res.users || [];
+      const matched = users.filter((u: any) => u.email?.toLowerCase() === email);
 
-        if (this.matchedUsers.length === 0) {
-          this.toast.error('Nessun utente trovato con questa email.');
-          this.isSearching = false;
-          return;
-        }
+      // ✅ only show Active records — no point moving an already inactive user
+      this.matchedUsers = matched.filter((u: any) =>
+        u.user_status?.toLowerCase() === 'active'
+      );
 
-        // if only one row, auto-select it
-        if (this.matchedUsers.length === 1) {
-          this.selectUser(this.matchedUsers[0]);
-        } else {
-          this.toast.info(`Trovati ${this.matchedUsers.length} record per questa email. Seleziona il dipartimento.`);
-        }
-
+      if (this.matchedUsers.length === 0) {
+        this.toast.error('No active user found with this email.');
         this.isSearching = false;
-      },
-      error: (err: any) => {
-        this.isSearching = false;
-        this.handleError(err);
+        return;
       }
-    });
-  }
+
+      if (this.matchedUsers.length === 1) {
+        this.selectUser(this.matchedUsers[0]);
+      } else {
+        this.toast.info(`User active in ${this.matchedUsers.length} departments. Select the one to edit.`);
+      }
+
+      this.isSearching = false;
+    },
+    error: (err: any) => {
+      this.isSearching = false;
+      this.handleError(err);
+    }
+  });
+}
 
   selectUser(user: any) {
     this.currentUser = user;
@@ -99,7 +103,7 @@ export class UpdateUserStatusFormComponent {
     }
 
     if (!this.currentUser) {
-      this.toast.warning('Cerca prima un utente tramite email.');
+      this.toast.warning('Please search an user by email first.');
       return;
     }
 
@@ -107,16 +111,19 @@ export class UpdateUserStatusFormComponent {
     const status = (userStatus.charAt(0).toUpperCase() + userStatus.slice(1)) as 'Active' | 'Inactive';
 
     const departmentChanged = newDepartment !== this.currentUser.department;
-    const statusChanged = status !== this.currentUser.user_status;
+    //const statusChanged = status !== this.currentUser.user_status;
+
+    const currentStatus = this.currentUser.user_status?.charAt(0).toUpperCase() +  this.currentUser.user_status?.slice(1).toLowerCase();
+    const statusChanged = status !== currentStatus;
 
     if (!departmentChanged && !statusChanged) {
-      this.toast.info('Nessuna modifica rilevata.');
+      this.toast.info('No changes detected.');
       return;
     }
 
     this.isSubmitting = true;
 
-    // ✅ chain calls: department first, then status
+    //chain calls: department first, then status
     const deptCall$ = departmentChanged
       ? this.userService.changeUserDepartment({
           email:          this.currentUser.email,
@@ -142,10 +149,10 @@ export class UpdateUserStatusFormComponent {
       next: () => {
         this.isSubmitting = false;
         const msg = [
-          departmentChanged ? `dipartimento → ${newDepartment}` : null,
-          statusChanged ? `stato → ${status}` : null,
+          departmentChanged ? `department → ${newDepartment}` : null,
+          statusChanged ? `status → ${status}` : null,
         ].filter(Boolean).join(', ');
-        this.toast.success(`Utente aggiornato: ${msg}`);
+        this.toast.success(`User updated: ${msg}`);
         setTimeout(() => this.router.navigate(['/home']), 2000);
       },
       error: (err: any) => {
@@ -159,23 +166,23 @@ export class UpdateUserStatusFormComponent {
   private handleError(err: any) {
     switch (err.status) {
       case 400:
-        this.toast.warning(err.error?.error || 'Dati non validi.');
+        this.toast.warning(err.error?.error || 'Invalid data.');
         break;
       case 401:
-        this.toast.error('Sessione scaduta. Effettua di nuovo il login.');
+        this.toast.error('Session expired. Please, login again.');
         setTimeout(() => this.router.navigate(['/login']), 2000);
         break;
       case 403:
-        this.toast.error('Non hai i permessi per modificare lo stato utente.');
+        this.toast.error('You do not have permission to modify the user status.');
         break;
       case 404:
-        this.toast.error('Utente non trovato.');
+        this.toast.error('User not found.');
         break;
       case 500:
-        this.toast.error('Errore interno al server. Riprova più tardi.');
+        this.toast.error('Internal server error. Please try again later.');
         break;
       default:
-        this.toast.error('Qualcosa è andato storto. Riprova.');
+        this.toast.error('Something went wrong. Please try again.');
     }
   }
 

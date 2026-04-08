@@ -17,11 +17,11 @@
             
             <!-- Multiple rows — pick which department record to edit -->
             <div class="form-group" *ngIf="matchedUsers.length > 1">
-                <label>Select Department Record*</label>
+                <label>Current Department*</label>
                 <select formControlName="selectedRow" (change)="onRowSelected($event)">
-                    <option value="">Select a department record</option>
+                    <option value="">Select current department</option>
                     <option *ngFor="let u of matchedUsers" [value]="u.department">
-                        {{ u.department }} — {{ u.user_status }}
+                        {{ u.department }}
                     </option>
                 </select>
             </div>

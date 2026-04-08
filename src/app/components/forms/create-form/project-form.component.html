@@ -66,16 +66,13 @@
           <br>
           <span style="font-size: 0.75rem;">Max 10 files, up to 10MB each — PDF, Word, JPG supported</span>
         </label>
-        <input type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" (change)="onFileSelected($event)" />
-        <ul class="file-list" *ngIf="uploadedFiles.length">
-          <li *ngFor="let file of uploadedFiles; let i = index">
-            {{ file.name }}
-            <span style="font-size: 0.75rem; color: #6b7a99;">
-              ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)
-            </span>
-            <button type="button" (click)="removeFile(i)">Remove</button>
-          </li>
-        </ul>
+        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" (change)="onFileSelected($event)"
+          style="display: none;" />
+        
+        <button type="button" class="file-upload-btn" (click)="triggerFileInput()">
+          <img src="../../../../assets/icons/folder (2).png" alt="folder-icon" style="width: 15px;">
+          Choose Files
+        </button>
         <p *ngIf="uploadedFiles.length === 0" style="font-size: 0.8rem; color: #6b7a99; margin-top: 6px;">
           No files selected
         </p>
