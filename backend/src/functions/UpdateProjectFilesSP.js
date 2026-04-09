@@ -3,12 +3,12 @@ const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
 const withAuth = require("../auth/withAuth.js");
 const requireRole = require("../auth/requireRole.js");
-const { projectSchema, validate } = require("../../projectValidator.js");
 const busboy = require("busboy");
 const stream = require("stream");
 const {
   uploadFileToSharePoint,
   deleteFileFromSharePoint,
+  getFolderUrl,
 } = require("../../uploadFileToSharePoint.js");
 
 function generateProjectId() {
@@ -30,11 +30,12 @@ app.http("UpdateProjectFilesSP", {
     if (preflight) return preflight;
 
     try {
+      // Autenticazione
       const user = await withAuth(req, context);
       requireRole(user, "admin");
       const user_email = user.preferred_username;
 
-      // --- Parsing multipart/form-data ---
+      // Parsing multipart/form-data
       const bb = busboy({ headers: Object.fromEntries(req.headers) });
       const fields = {};
       const uploadedFiles = [];
@@ -42,7 +43,6 @@ app.http("UpdateProjectFilesSP", {
       bb.on("field", (name, val) => {
         fields[name] = val;
       });
-
       bb.on("file", (fieldname, file, info) => {
         const { filename } = info;
         const pass = new stream.PassThrough();
@@ -62,46 +62,35 @@ app.http("UpdateProjectFilesSP", {
           .catch(reject);
       });
 
-      // --- Estrai old_project_id dai fields e valida il resto ---
-      const { old_project_id, ...projectData } = fields;
+      const { old_project_id, project_phase, notes } = fields;
 
-      if (!old_project_id) {
+      if (!old_project_id || !project_phase || !notes) {
         return withCors({
           status: 400,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             success: false,
-            error: "old_project_id è obbligatorio",
+            error: "old_project_id e project_phase e note sono obbligatori",
           }),
         });
       }
 
-      const { errors, cleaned } = validate(projectSchema, projectData);
-      if (Object.keys(errors).length > 0) {
-        return withCors({
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ success: false, errors }),
-        });
-      }
-
-      // --- Transazione DB ---
+      // Transazione DB
       const pool = await getConnection();
       const transaction = pool.transaction();
       await transaction.begin();
 
-      let newProjectId;
       const uploadedUrls = [];
       const uploadedFilenames = [];
 
       try {
-        // 1️⃣ Controlla che il vecchio progetto esista
-        const existing = await transaction
+        // 1️⃣ Controlla che il progetto originale esista
+        const existingRes = await transaction
           .request()
           .input("old_project_id", old_project_id)
-          .query("SELECT 1 FROM Projects WHERE project_id = @old_project_id");
+          .query("SELECT * FROM Projects WHERE project_id = @old_project_id");
 
-        if (existing.recordset.length === 0) {
+        if (existingRes.recordset.length === 0) {
           await transaction.rollback();
           return withCors({
             status: 404,
@@ -113,42 +102,44 @@ app.http("UpdateProjectFilesSP", {
           });
         }
 
-        // 2️⃣ Disattiva il vecchio progetto
-        await transaction.request().input("old_project_id", old_project_id)
-          .query(`
-            UPDATE Projects
-            SET project_visibility = 'inactive',
-                project_status = 'Completed'
-            WHERE project_id = @old_project_id
-          `);
+        const oldProject = existingRes.recordset[0];
 
-        // 3️⃣ Genera project_id unico per il nuovo progetto
+        // 2️⃣ Disattiva il vecchio progetto
+        await transaction
+          .request()
+          .input("old_project_id", old_project_id)
+          .query(
+            "UPDATE Projects SET project_visibility='Inactive', project_status='Completed' WHERE project_id=@old_project_id"
+          );
+
+        // 3️⃣ Genera nuovo project_id unico
+        let newProjectId;
         let exists;
         do {
           newProjectId = generateProjectId();
           const check = await transaction
             .request()
             .input("project_id", newProjectId)
-            .query("SELECT 1 FROM Projects WHERE project_id = @project_id");
+            .query("SELECT 1 FROM Projects WHERE project_id=@project_id");
           exists = check.recordset.length > 0;
         } while (exists);
 
-        context.log("Generated unique project_id:", newProjectId);
+        context.log("Generated new project_id:", newProjectId);
 
-        // 4️⃣ Inserisci il nuovo progetto
+        // 4️⃣ Inserisci nuovo progetto (clonando vecchio ma aggiornando phase e notes)
         const result = await transaction
           .request()
           .input("project_id", newProjectId)
-          .input("project_name", cleaned.project_name)
-          .input("project_code", cleaned.project_code)
-          .input("region", cleaned.region)
-          .input("market_segment", cleaned.market_segment)
-          .input("project_phase", cleaned.project_phase)
-          .input("project_status", cleaned.project_status)
-          .input("notes", cleaned.notes)
-          .input("attachments_link", cleaned.attachments_link)
-          .input("project_visibility", "active")
-          .input("innovation_area", cleaned.innovation_area).query(`
+          .input("project_name", oldProject.project_name)
+          .input("project_code", oldProject.project_code)
+          .input("region", oldProject.region)
+          .input("market_segment", oldProject.market_segment)
+          .input("project_phase", project_phase)
+          .input("project_status", oldProject.project_status)
+          .input("notes", notes)
+          .input("attachments_link", oldProject.attachments_link)
+          .input("project_visibility", "Active")
+          .input("innovation_area", oldProject.innovation_area).query(`
             INSERT INTO Projects (
               project_id, project_name, project_code, region, market_segment,
               project_phase, project_status, notes, attachments_link,
@@ -166,11 +157,12 @@ app.http("UpdateProjectFilesSP", {
         for (const file of uploadedFiles) {
           const url = await uploadFileToSharePoint(
             file.stream,
-            newProjectId,
+            oldProject.project_name,
+            project_phase,
             file.filename
           );
           uploadedUrls.push(url);
-          uploadedFilenames.push(file.filename); // traccia solo dopo upload riuscito
+          uploadedFilenames.push(file.filename);
 
           await transaction
             .request()
@@ -183,6 +175,21 @@ app.http("UpdateProjectFilesSP", {
             `);
         }
 
+        // 6️⃣ Aggiorna attachments_link se ci sono file caricati
+        if (uploadedFiles.length > 0) {
+          const folderUrl = await getFolderUrl(
+            oldProject.project_name,
+            project_phase
+          );
+          await transaction
+            .request()
+            .input("project_id", newProjectId)
+            .input("attachments_link", folderUrl)
+            .query(
+              "UPDATE Projects SET attachments_link=@attachments_link WHERE project_id=@project_id"
+            );
+        }
+
         await transaction.commit();
 
         return withCors({
@@ -190,17 +197,21 @@ app.http("UpdateProjectFilesSP", {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             success: true,
-            message: "Progetto aggiornato con successo",
+            message: "Progetto aggiornato con clone e nuovo inserimento",
             old_project_id,
             new_project: result.recordset[0],
             files: uploadedUrls,
           }),
         });
       } catch (txErr) {
-        // Rollback file SharePoint già caricati con successo
+        // Rollback file SharePoint caricati
         for (const filename of uploadedFilenames) {
           try {
-            await deleteFileFromSharePoint(newProjectId, filename);
+            await deleteFileFromSharePoint(
+              oldProject.project_name,
+              project_phase,
+              filename
+            );
           } catch {}
         }
         await transaction.rollback();
@@ -209,19 +220,15 @@ app.http("UpdateProjectFilesSP", {
     } catch (err) {
       context.error(err);
 
-      if (err.message === "FORBIDDEN") {
+      if (err.message === "FORBIDDEN")
         return withCors({
           status: 403,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ success: false, error: "Forbidden" }),
         });
-      }
-
       if (
-        err.message === "NO_AUTH_HEADER" ||
-        err.message === "INVALID_TOKEN" ||
-        err.name === "JsonWebTokenError" ||
-        err.name === "TokenExpiredError"
+        ["NO_AUTH_HEADER", "INVALID_TOKEN"].includes(err.message) ||
+        ["JsonWebTokenError", "TokenExpiredError"].includes(err.name)
       ) {
         return withCors({
           status: 401,

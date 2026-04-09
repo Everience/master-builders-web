@@ -145,7 +145,8 @@ app.http("CreateProjectFilesSP", {
         for (const file of uploadedFiles) {
           const url = await uploadFileToSharePoint(
             file.stream,
-            projectId,
+            cleaned.project_name,
+            cleaned.project_phase,
             file.filename
           );
           uploadedUrls.push(url);
@@ -165,7 +166,10 @@ app.http("CreateProjectFilesSP", {
         let folderUrl = null;
 
         if (uploadedFiles.length > 0) {
-          folderUrl = await getFolderUrl(projectId);
+          folderUrl = await getFolderUrl(
+            cleaned.project_name,
+            cleaned.project_phase
+          );
 
           await transaction
             .request()
@@ -180,7 +184,11 @@ app.http("CreateProjectFilesSP", {
         // ✅ Rollback solo dei file già caricati con successo su SharePoint
         for (const filename of uploadedFilenames) {
           try {
-            await deleteFileFromSharePoint(projectId, filename);
+            await deleteFileFromSharePoint(
+              cleaned.project_name,
+              cleaned.project_phase,
+              filename
+            );
           } catch {}
         }
         await transaction.rollback();
