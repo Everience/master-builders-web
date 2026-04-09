@@ -56,7 +56,6 @@ app.http("ChangeUserDepartment", {
             FROM Users
             WHERE email = @email
               AND department = @department
-              AND user_status = 'Active'
           `);
 
         if (sourceResult.recordset.length === 0) {
