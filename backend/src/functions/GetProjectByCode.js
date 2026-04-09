@@ -29,7 +29,21 @@ app.http("GetProjectByCode", {
       const result = await pool
         .request()
         .input("project_code", code)
-        .query("SELECT * FROM Projects WHERE project_code = @project_code");
+        .query(
+          `SELECT project_id, 
+            project_name,
+            project_code,
+            region,
+            market_segment,
+            project_phase,
+            project_status,
+            notes,
+            attachments_link,
+            project_visibility,
+            innovation_area,
+            created_at 
+            FROM Projects WHERE project_code = @project_code`
+        );
 
       if (result.recordset.length === 0) {
         return withCors({
