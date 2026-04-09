@@ -18,7 +18,7 @@ app.http("ChangeUserDepartment", {
       const body = await request.json();
       const { email, department, new_department } = body;
 
-      // ✅ VALIDAZIONE
+      // Validazioni
       if (!email || !department || !new_department) {
         return withCors({
           status: 400,
@@ -28,48 +28,74 @@ app.http("ChangeUserDepartment", {
         });
       }
 
+      if (
+        department.trim().toLowerCase() === new_department.trim().toLowerCase()
+      ) {
+        return withCors({
+          status: 400,
+          body: JSON.stringify({
+            error: "Source and target department must be different",
+          }),
+        });
+      }
+
       const pool = await getConnection();
       const transaction = pool.transaction();
-
       let transactionStarted = false;
 
       try {
         await transaction.begin();
         transactionStarted = true;
 
-        // 🔍 Controllo utente esistente
-        const userResult = await transaction
+        //verifica utente
+        const sourceResult = await transaction
           .request()
           .input("email", email)
           .input("department", department).query(`
             SELECT TOP 1 user_name
             FROM Users
-            WHERE email = @email AND department = @department
+            WHERE email = @email
+              AND department = @department
+              AND user_status = 'Active'
           `);
 
-        if (userResult.recordset.length === 0) {
+        if (sourceResult.recordset.length === 0) {
           throw new Error("USER_NOT_FOUND");
         }
 
-        const user_name = userResult.recordset[0].user_name;
+        const user_name = sourceResult.recordset[0].user_name;
 
-        // 🔍 Controllo duplicato nel nuovo dipartimento
-        const duplicateCheck = await transaction
+        // verifica utente destinazione
+        const activeInTarget = await transaction
           .request()
           .input("email", email)
           .input("new_department", new_department).query(`
             SELECT TOP 1 1
             FROM Users
-            WHERE email = @email 
-              AND department = @new_department 
+            WHERE email = @email
+              AND department = @new_department
               AND user_status = 'Active'
           `);
 
-        if (duplicateCheck.recordset.length > 0) {
-          throw new Error("user already exist in new department");
+        if (activeInTarget.recordset.length > 0) {
+          throw new Error("USER_ALREADY_ACTIVE");
         }
 
-        // 🔄 Disattiva utente nel vecchio dipartimento
+        // verifica utente dormiente in destinazione
+        const inactiveInTarget = await transaction
+          .request()
+          .input("email", email)
+          .input("new_department", new_department).query(`
+            SELECT TOP 1 1
+            FROM Users
+            WHERE email = @email
+              AND department = @new_department
+              AND user_status = 'Inactive'
+          `);
+
+        const hasInactiveRecord = inactiveInTarget.recordset.length > 0;
+
+        // 4a Disattiva utente
         await transaction
           .request()
           .input("email", email)
@@ -79,24 +105,41 @@ app.http("ChangeUserDepartment", {
             WHERE email = @email AND department = @department
           `);
 
-        // ⚠️ FIX: usare new_department
-        const new_user_id =
-          email.trim().toLowerCase() +
-          "|" +
-          new_department.trim().toLowerCase();
+        let resultRecord;
 
-        // ➕ Inserisci nuovo record
-        const insertResult = await transaction
-          .request()
-          .input("new_user_id", new_user_id)
-          .input("email", email)
-          .input("user_name", user_name)
-          .input("department", new_department)
-          .input("status", "Active").query(`
-            INSERT INTO Users (user_id_internal, email, user_name, department, user_status)
-            OUTPUT INSERTED.*
-            VALUES (@new_user_id, @email, @user_name, @department, @status)
-          `);
+        if (hasInactiveRecord) {
+          // 4b riattiva record dormiente
+          const reactivateResult = await transaction
+            .request()
+            .input("email", email)
+            .input("new_department", new_department).query(`
+              UPDATE Users
+              SET user_status = 'Active'
+              OUTPUT INSERTED.*
+              WHERE email = @email AND department = @new_department
+            `);
+
+          resultRecord = reactivateResult.recordset[0];
+        } else {
+          // 4c inserisci nuovo record
+          const new_user_id =
+            email.trim().toLowerCase() +
+            "|" +
+            new_department.trim().toLowerCase();
+
+          const insertResult = await transaction
+            .request()
+            .input("new_user_id", new_user_id)
+            .input("email", email)
+            .input("user_name", user_name)
+            .input("new_department", new_department).query(`
+              INSERT INTO Users (user_id_internal, email, user_name, department, user_status)
+              OUTPUT INSERTED.*
+              VALUES (@new_user_id, @email, @user_name, @new_department, 'Active')
+            `);
+
+          resultRecord = insertResult.recordset[0];
+        }
 
         await transaction.commit();
 
@@ -104,8 +147,10 @@ app.http("ChangeUserDepartment", {
           status: 200,
           body: JSON.stringify({
             message: "User moved to new department",
-            action: "department_changed",
-            user: insertResult.recordset[0],
+            action: hasInactiveRecord
+              ? "department_reactivated"
+              : "department_changed",
+            user: resultRecord,
           }),
         });
       } catch (err) {
@@ -117,19 +162,18 @@ app.http("ChangeUserDepartment", {
           }
         }
 
-        // 🎯 Errori gestiti
         if (err.message === "USER_NOT_FOUND") {
           return withCors({
             status: 404,
             body: JSON.stringify({
-              error: "User not found in the original department",
+              error: "User not found or already inactive in source department",
             }),
           });
         }
 
-        if (err.message === "USER_ALREADY_EXISTS") {
+        if (err.message === "USER_ALREADY_ACTIVE") {
           return withCors({
-            status: 400,
+            status: 409,
             body: JSON.stringify({
               error: "User already active in target department",
             }),
