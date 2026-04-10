@@ -63,6 +63,7 @@ app.http("ChangeUserDepartment", {
         }
 
         const user_name = sourceResult.recordset[0].user_name;
+        const role = sourceResult.recordset[0].role;
 
         // verifica utente destinazione
         const activeInTarget = await transaction
@@ -131,10 +132,11 @@ app.http("ChangeUserDepartment", {
             .input("new_user_id", new_user_id)
             .input("email", email)
             .input("user_name", user_name)
+            .input("role", role)
             .input("new_department", new_department).query(`
-              INSERT INTO Users (user_id_internal, email, user_name, department, user_status)
+              INSERT INTO Users (user_id_internal, email, user_name, department, user_status, role)
               OUTPUT INSERTED.*
-              VALUES (@new_user_id, @email, @user_name, @new_department, 'Active')
+              VALUES (@new_user_id, @email, @user_name, @new_department, 'Active', @role)
             `);
 
           resultRecord = insertResult.recordset[0];
