@@ -3,13 +3,6 @@
   <div class="form-container">
 
     <form [formGroup]="votingForm" (ngSubmit)="onSubmit()" class="voting-form">
-      <div class="form-group">
-        <label>Team / Department*</label>
-        <select formControlName="team">
-          <option value="">Select region</option>
-          <option *ngFor="let team of teams" [value]="team">{{ team }}</option>
-        </select>
-      </div>
 
       <div class="form-group">
         <label>Project Name*</label>
@@ -17,7 +10,7 @@
           <option value="">
             {{ isLoadingProjects ? 'Loading projects...' : 'Select a project' }}
           </option>
-          <option *ngFor="let project of allProjects" [value]="project.project_name">
+          <option *ngFor="let project of allProjects" [value]="project.project_id">
             {{ project.project_name }}
           </option>
         </select>
@@ -25,41 +18,31 @@
 
 
       <div class="form-group">
-        <label>Project Status*</label>
-        <select formControlName="projectStatus">
-          <option value="">Select status</option>
-          <option *ngFor="let status of projectStatuses" [value]="status">{{ status }}</option>
-        </select>
+        <label>Project Status</label>
+        <input type="text" formControlName="projectStatus" readonly />
       </div>
 
       <div class="form-group">
-        <label>Innovation Area*</label>
-        <select formControlName="innovationArea">
-          <option value="">Select area</option>
-          <option *ngFor="let area of innovationAreas" [value]="area">{{ area }}</option>
-        </select>
+        <label>Innovation Area</label>
+        <input type="text" formControlName="innovationArea" readonly />
+      </div>
+      
+      <div class="form-group">
+        <label>Region</label>
+        <input type="text" formControlName="region" readonly />
+      </div>
+      
+      <div class="form-group">
+        <label>Market Segment</label>
+        <input type="text" formControlName="marketSegment" readonly />
       </div>
 
-      <div class="form-group">
-        <label>Region*</label>
-        <select formControlName="region">
-          <option value="">Select region</option>
-          <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Market Segment*</label>
-        <select formControlName="marketSegment">
-          <option value="">Select segment</option>
-          <option *ngFor="let segment of marketSegments" [value]="segment">{{ segment }}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Project Documentation*</label>
-        <textarea formControlName="projectDocs" rows="3" placeholder="E.g.: Link to Sharepoint"
-          style="height: 30px;"></textarea>
+      <div class="form-group" *ngIf="projectDocsLink">
+        <label>Project Documentation</label>
+        <a [href]="projectDocsLink" target="_blank" class="file-chip">
+          <span class="file-chip__icon">📁</span>
+          <span class="file-chip__name">View project files on SharePoint</span>
+        </a>
       </div>
 
       <div class="form-group">
@@ -80,7 +63,7 @@
       </div>
 
       <div class="form-group">
-        <label>Reasoning fot the score*</label>
+        <label>Reasoning for the score*</label>
         <textarea formControlName="scoreReason" rows="3"
           style="border-bottom: 2px solid #007acc; border-radius: 6px 6px 0 0;"></textarea>
       </div>

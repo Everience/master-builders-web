@@ -9,7 +9,6 @@ import {
 import { Router } from '@angular/router';
 import { ProjectService } from '../../../services/project/project.service';
 import { ToastService } from '../../../services/project/toast.service';
-import { AuthService } from '../../../services/project/auth.service';
 
 @Component({
   selector: 'app-voting-form',
@@ -18,46 +17,35 @@ import { AuthService } from '../../../services/project/auth.service';
   templateUrl: './voting-form.component.html',
   styleUrl: './voting-form.component.scss',
 })
+
 export class VotingFormComponent implements OnInit {
   votingForm: FormGroup;
 
-  teams = ['Marketing', 'Sviluppo'];
-  projectStatuses = ['In Progress', 'On Hold', 'Completed'];
-  innovationAreas = [
-    'Advanced rheology',
-    'Stength development',
-    'Durability',
-    'Sustainability',
-    'Cost efficiency',
-    'Growth',
-  ];
-  regions = ['AMET', 'ANZ', 'EU', 'GLOBAL', 'BA', 'SA'];
-  marketSegments = ['AS', 'CA', 'CS', 'FIBERS', 'UGC', 'VTG'];
   scores = [1, 2, 3, 4, 5];
-
   allProjects: any[] = [];
   private currentProjectId: string | null = null;
   isSubmitting = false;
   isLoadingProjects = false;
-  isSearching = false;
-  submitError: string | null = null;
-  submitSuccess = false;
+  projectDocsLink: string = '';
 
-  constructor(private fb: FormBuilder, private router: Router, private projectService: ProjectService, private toast: ToastService, private authService: AuthService) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private projectService: ProjectService,
+    private toast: ToastService
+  ) {
     this.votingForm = this.fb.group({
-      team:          ['', Validators.required],
-      projectName:   ['', Validators.required],  
-      projectStatus: [''],                        
-      innovationArea:[''],                        
-      region:        [''],                        
-      marketSegment: [''],                       
-      projectDocs:   [''],                        
-      notes:         [''],
-      score:         ['', Validators.required],
-      scoreReason:   ['', Validators.required],
+      projectName:    ['', Validators.required],
+      projectStatus:  [''],
+      innovationArea: [''],
+      region:         [''],
+      marketSegment:  [''],
+      notes:          [''],
+      score:          ['', Validators.required],
+      scoreReason:    ['', Validators.required],
     });
   }
-  
+
   ngOnInit() {
     this.loadAllProjects();
   }
@@ -66,47 +54,57 @@ export class VotingFormComponent implements OnInit {
     this.isLoadingProjects = true;
     this.projectService.getProjects().subscribe({
       next: (res) => {
-        this.allProjects = res.projects || res;
-        this.isLoadingProjects = false;
+        const projects = res.projects || res;
+
+        //filter: only In Progress + active visibility
+        this.allProjects = projects.filter((p: any) =>
+          p.project_status === 'In Progress' &&
+          p.project_visibility?.toLowerCase() === 'active'
+        );
+
         console.log(this.allProjects)
-      },
-      error: (err) => {
-        console.error('Error fetching projects:', err);
         this.isLoadingProjects = false;
+
+        //toast if no votable projects
+        if (this.allProjects.length === 0) {
+          this.toast.info('No active projects available to vote.');
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingProjects = false;
+        this.toast.error('Error loading projects. Please try again.');
       }
     });
   }
 
-  goBack() {
-    this.router.navigate(['/home']);
-  }
-
   onProjectSelected(event: Event) {
-    const selectedName = (event.target as HTMLSelectElement).value;
-    const match = this.allProjects.find(p => p.project_name === selectedName);
+  const selectedId = (event.target as HTMLSelectElement).value;
+  const match = this.allProjects.find((p: any) => p.project_id === selectedId); // ✅
 
-    if (!match) {
-      this.currentProjectId = null;
-      this.clearProjectFields();
-      return;
-    }
-
-    this.currentProjectId = match.project_id;
-
-    this.votingForm.patchValue({
-      projectStatus:  match.project_status,
-      innovationArea: match.Innovation_area,
-      region:         match.region,
-      marketSegment:  match.market_segment,
-      projectDocs:    match.attachments_link,
-    }, { emitEvent: false });
-
-    ['projectStatus', 'innovationArea', 'region', 'marketSegment', 'projectDocs']
-      .forEach(field => this.votingForm.get(field)!.disable({ emitEvent: false }));
+  if (!match) {
+    this.currentProjectId = null;
+    this.projectDocsLink = '';
+    this.clearProjectFields();
+    return;
   }
 
+  this.currentProjectId = match.project_id;
+  this.projectDocsLink = match.attachments_link || '';
+
+  this.votingForm.patchValue({
+    projectName:    match.project_name,  // ✅ still shows the name in the form
+    projectStatus:  match.project_status,
+    innovationArea: match.innovation_area,
+    region:         match.region,
+    marketSegment:  match.market_segment,
+    notes:          match.notes,
+  }, { emitEvent: false });
+
+  ['projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes']
+    .forEach(field => this.votingForm.get(field)!.disable({ emitEvent: false }));
+}
   clearProjectFields() {
-    ['projectStatus', 'innovationArea', 'region', 'marketSegment', 'projectDocs']
+    ['projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes']
       .forEach(field => this.votingForm.get(field)!.enable({ emitEvent: false }));
 
     this.votingForm.patchValue({
@@ -114,10 +112,10 @@ export class VotingFormComponent implements OnInit {
       innovationArea: '',
       region:         '',
       marketSegment:  '',
-      projectDocs:    '',
+      notes:          '',
     }, { emitEvent: false });
   }
-  
+
   onSubmit() {
     if (this.votingForm.invalid) {
       this.votingForm.markAllAsTouched();
@@ -125,12 +123,11 @@ export class VotingFormComponent implements OnInit {
     }
 
     if (!this.currentProjectId) {
-      this.submitError = 'Please select a valid project.';
+      this.toast.warning('Please select a valid project.');
       return;
     }
 
     this.isSubmitting = true;
-    this.submitError = null;
 
     const payload = {
       project_id:      this.currentProjectId,
@@ -140,13 +137,11 @@ export class VotingFormComponent implements OnInit {
 
     this.projectService.voteProject(payload).subscribe({
       next: () => {
-        console.log(payload)
         this.isSubmitting = false;
-        this.submitSuccess = true;
+        this.toast.success('Vote submitted successfully!');
         setTimeout(() => this.router.navigate(['/home']), 2000);
       },
-      error: (err) => {
-        console.log(payload)
+      error: (err: any) => {
         this.isSubmitting = false;
         this.handleError(err);
       }
@@ -157,28 +152,33 @@ export class VotingFormComponent implements OnInit {
     switch (err.status) {
       case 400:
         this.toast.warning(err.error?.error === 'Voting closed'
-          ? 'Il progetto non è aperto al voto.'
-          : 'Dati non validi. Controlla i campi.');
+          ? 'This project is not open for voting.'
+          : 'Invalid data. Please check the fields.');
         break;
       case 401:
-        this.toast.error('Sessione scaduta. Effettua di nuovo il login.');
+        this.toast.error('Session expired. Please log in again.');
         setTimeout(() => this.router.navigate(['/login']), 2000);
         break;
       case 403:
-        this.toast.error('Non hai i permessi per votare.');
+        this.toast.error('You do not have permission to vote.');
         break;
       case 404:
-        this.toast.error('Progetto non trovato.');
+        this.toast.error('Project not found.');
         break;
       case 409:
-        this.toast.error('Hai già votato per questo progetto.');
+        this.toast.error(err.error?.error === 'User con piu department attivi'
+          ? 'Your account is active in multiple departments. Please contact an administrator.'
+          : 'You have already voted for this project.');
         break;
       case 500:
-        this.toast.error('Errore interno al server. Riprova più tardi.');
+        this.toast.error('Internal server error. Please try again later.');
         break;
       default:
-        this.toast.error('Qualcosa è andato storto. Riprova.');
+        this.toast.error('Something went wrong. Please try again.');
     }
   }
 
+  goBack() {
+    this.router.navigate(['/home']);
+  }
 }

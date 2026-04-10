@@ -105,3 +105,30 @@
     }
   }
 }
+
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #e8eef7;
+  border: 1px solid #c0cde0;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #003087;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #d0ddf0;
+  }
+
+  &__icon {
+    font-size: 1rem;
+  }
+
+  &__name {
+    white-space: nowrap;
+  }
+}

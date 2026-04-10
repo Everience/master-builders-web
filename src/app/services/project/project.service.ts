@@ -97,7 +97,17 @@ export class ProjectService {
     );
   }
 
-  updateProject(payload: {
+updateProjectWithFiles(formData: FormData): Observable<any> {
+  return this.getAuthHeaders().pipe(
+    switchMap(headers => this.http.post(
+      `${this.baseUrl}/UpdateProjectFilesSP`,
+      formData,
+      { headers, params: { code: this.key } }
+    ))
+  );
+}
+  
+updateProject(payload: {
     old_project_id: string;
     project_name: string;
     project_code: string;
@@ -110,14 +120,14 @@ export class ProjectService {
     project_visibility: string;
     innovation_area: string;
   }): Observable<any> {
-    return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.post(
-        `${this.baseUrl}/UpdateProject`,
-        payload,
-        { headers, params: { code: this.key } }
-      ))
-    );
-  }
+  return this.getAuthHeaders().pipe(
+    switchMap(headers => this.http.post(
+      `${this.baseUrl}/UpdateProject`,
+      payload,
+      { headers, params: { code: this.key } }
+    ))
+  );
+}
 
   changeProjectStatus(payload: {
     project_id: string;

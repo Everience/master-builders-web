@@ -65,9 +65,40 @@
                     <option *ngFor="let phase of projectPhases" [value]="phase">{{ phase }}</option>
                 </select>
             </div>
+            <!-- existing files — shown after search, once BE adds files to getProjectByCode -->
+            <div class="form-group" *ngIf="currentProjectId && attachmentsLink">
+                <label>Existing Files</label>
+                <a [href]="attachmentsLink" target="_blank" class="file-chip">
+                    <img src="../../../../assets/icons/folder (2).png" alt="folder-icon" style="width: 15px;">
+                    <span class="file-chip__name">View project files on SharePoint</span>
+                </a>
+            </div>
+            
+            <!-- new files — optional -->
             <div class="form-group">
-                <label>Attachments Link <span class="editable-hint">editable · optional</span></label>
-                <input type="text" formControlName="attachmentsLink" placeholder="E.g.: https://netecoorg.sharepoint.com/..." />
+                <label>
+                    Add New Files <span class="editable-hint">editable · optional</span>
+                    <br>
+                    <span style="font-size: 0.75rem;">Max 10 files, up to 10MB each</span>
+                </label>
+            
+                <input type="file" id="updateFileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx"
+                    (change)="onFileSelected($event)" style="display: none;" />
+            
+                <button type="button" class="file-chip" (click)="triggerFileInput()">
+                    <img src="../../../../assets/icons/folder (2).png" alt="folder-icon" style="width: 15px;">
+                    Choose Files
+                </button>
+            
+                <ul class="file-list" *ngIf="newFiles.length">
+                    <li *ngFor="let file of newFiles; let i = index">
+                        {{ getFileIcon(file.name) }} {{ file.name }}
+                        <span style="font-size: 0.75rem; color: #6b7a99;">
+                            ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)
+                        </span>
+                        <button type="button" (click)="removeNewFile(i)">Remove</button>
+                    </li>
+                </ul>
             </div>
 
             <div class="button-container">

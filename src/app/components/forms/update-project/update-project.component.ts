@@ -37,6 +37,13 @@ export class UpdateProjectComponent implements OnInit {
   projectPhases = ['Business Case', 'Lab Phase', 'Pilot Phase', 'Launch Phase'];
   projectStatuses = ['In Progress', 'On Hold', 'Completed'];
 
+  //files handling
+  existingFiles: { filename: string; blob_url: string }[] = [];
+  newFiles: File[] = [];
+  readonly MAX_FILES = 10;
+  readonly MAX_SIZE_MB = 10;
+  attachmentsLink: string = '';
+
   constructor(private fb: FormBuilder, private router: Router, private projectService: ProjectService, private toast: ToastService) {
     
   }
@@ -65,11 +72,13 @@ searchProject() {
     next: (res) => {
       const p = res.project;
       this.currentProjectId = p.project_id;
+      this.existingFiles = res.files || []; 
+      this.attachmentsLink = p.attachments_link || '';
 
       this.projectForm.patchValue({
         projectName:     p.project_name,
         projectStatus:   p.project_status,
-        innovationArea:  p.Innovation_area,
+        innovationArea:  p.innovation_area,
         region:          p.region,
         marketSegment:   p.market_segment,
         notes:           p.notes,
@@ -81,7 +90,7 @@ searchProject() {
         .forEach(field => this.projectForm.get(field)!.disable({ emitEvent: false }));
 
         this.isSearching = false;
-        this.toast.info('Progetto trovato. Modifica i campi necessari.');
+        this.toast.info('Project found. Edit the fields you want to update.');
       },
       error: (err: any) => {
         this.isSearching = false;
@@ -106,7 +115,51 @@ searchProject() {
       projectPhase:    '',
       attachmentsLink: '',
     }, { emitEvent: false });
+
+    this.existingFiles = [];
+    this.newFiles = [];
+    this.attachmentsLink = '';
   }
+
+  triggerFileInput() {
+    document.getElementById('updateFileInput')?.click();
+  }
+
+  onFileSelected(event: any) {
+    const selected = Array.from(event.target.files) as File[];
+    for (const file of selected) {
+      if (this.newFiles.length >= this.MAX_FILES) {
+        this.toast.warning(`You can upload a maximum of ${this.MAX_FILES} file.`);
+        break;
+      }
+      if (file.size > this.MAX_SIZE_MB * 1024 * 1024) {
+        this.toast.warning(`"${file.name}" exceeds the ${this.MAX_SIZE_MB}MB limit.`);
+        continue;
+      }
+      this.newFiles.push(file);
+    }
+    event.target.value = '';
+  }
+
+  removeNewFile(index: number) {
+    this.newFiles.splice(index, 1);
+  }
+
+  getFileIcon(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'pdf':          return '📄';
+      case 'doc':
+      case 'docx':         return '📝';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':          return '🖼️';
+      case 'xls':
+      case 'xlsx':         return '📊';
+      default:             return '📁';
+    }
+  }
+
   onSubmit() {
     if (this.projectForm.invalid) {
       this.projectForm.markAllAsTouched();
@@ -114,40 +167,69 @@ searchProject() {
     }
 
     if (!this.currentProjectId) {
-      this.toast.warning('Cerca prima un progetto tramite il codice.');
+      this.toast.warning('Please search for a project first.');
       return;
     }
 
     this.isSubmitting = true;
-
-    //getRawValue() gets values from disabled fields too
     const f = this.projectForm.getRawValue();
 
-    const payload = {
-      old_project_id:     this.currentProjectId,
-      project_name:       f.projectName,
-      project_code:       f.projectCode,
-      region:             f.region,
-      market_segment:     f.marketSegment,
-      project_phase:      f.projectPhase,
-      project_status:     f.projectStatus,
-      notes:              f.notes || '',
-      attachments_link:   f.attachmentsLink || '',
-      project_visibility: 'Active',
-      innovation_area:    f.innovationArea,
-    };
+    //if files selected → multipart, otherwise → JSON
+    if (this.newFiles.length > 0) {
+      const formData = new FormData();
+      formData.append('old_project_id',    this.currentProjectId);
+      formData.append('project_name',      f.projectName);
+      formData.append('project_code',      f.projectCode);
+      formData.append('region',            f.region);
+      formData.append('market_segment',    f.marketSegment);
+      formData.append('project_phase',     f.projectPhase);
+      formData.append('project_status',    f.projectStatus);
+      formData.append('notes',             f.notes || '');
+      formData.append('attachments_link',  f.attachmentsLink || '');
+      formData.append('project_visibility','active');
+      formData.append('innovation_area',   f.innovationArea);
 
-    this.projectService.updateProject(payload).subscribe({
-      next: () => {
-        this.isSubmitting = false;
-        this.toast.success('Progetto aggiornato con successo!');
-        setTimeout(() => this.router.navigate(['/home']), 2000);
-      },
-      error: (err: any) => {
-        this.isSubmitting = false;
-        this.handleError(err);
+      for (const file of this.newFiles) {
+        formData.append('files', file, file.name);
       }
-    });
+
+      this.projectService.updateProjectWithFiles(formData).subscribe({
+        next: () => this.handleSuccess(),
+        error: (err: any) => {
+          this.isSubmitting = false;
+          this.handleError(err);
+        }
+      });
+    } else {
+      // no files → use standard JSON endpoint
+      const payload = {
+        old_project_id:     this.currentProjectId,
+        project_name:       f.projectName,
+        project_code:       f.projectCode,
+        region:             f.region,
+        market_segment:     f.marketSegment,
+        project_phase:      f.projectPhase,
+        project_status:     f.projectStatus,
+        notes:              f.notes || '',
+        attachments_link:   f.attachmentsLink || '',
+        project_visibility: 'active',
+        innovation_area:    f.innovationArea,
+      };
+
+      this.projectService.updateProject(payload).subscribe({
+        next: () => this.handleSuccess(),
+        error: (err: any) => {
+          this.isSubmitting = false;
+          this.handleError(err);
+        }
+      });
+    }
+  }
+
+  private handleSuccess() {
+    this.isSubmitting = false;
+    this.toast.success('Project updated successfully!');
+    setTimeout(() => this.router.navigate(['/home']), 2000);
   }
 
   private handleError(err: any) {
@@ -155,31 +237,30 @@ searchProject() {
       case 400:
         const errors = err.error?.errors;
         if (errors) {
-          const messages = Object.values(errors).join(' | ');
-          this.toast.error(`Dati non validi: ${messages}`);
+          this.toast.error(`Invalid data: ${Object.values(errors).join(' | ')}`);
         } else {
-          this.toast.error(err.error?.error || 'Dati non validi. Controlla i campi.');
+          this.toast.error(err.error?.error || 'Invalid data, please check the fields.');
         }
         break;
       case 401:
-        this.toast.error('Sessione scaduta. Effettua di nuovo il login.');
+        this.toast.error('Session expired. Please, login again.');
         setTimeout(() => this.router.navigate(['/login']), 2000);
         break;
       case 403:
-        this.toast.error('Non hai i permessi per modificare questo progetto.');
+        this.toast.error('You do not have permission to modify this project.');
         break;
       case 404:
-        this.toast.error('Nessun progetto trovato con questo codice.');
+        this.toast.error('No project found with the current code.');
         break;
       case 500:
-        this.toast.error('Errore interno al server. Riprova più tardi.');
+        this.toast.error('Internal server error. Please try again later.');
         break;
       default:
-        this.toast.error('Qualcosa è andato storto. Riprova.');
+        this.toast.error('Something went wrong. Please try again.');
     }
   }
 
   goBack() {
-      this.router.navigate(['/home']);
-    }
+    this.router.navigate(['/home']);
+  }
 }

@@ -51,7 +51,7 @@ export class UpdateFormComponent implements OnInit {
         }, { emitEvent: false });
 
         this.isSearching = false;
-        this.toast.info('Progetto trovato.');
+        this.toast.info('Project found.');
       },
       error: (err: any) => {
         this.isSearching = false;
@@ -68,7 +68,7 @@ export class UpdateFormComponent implements OnInit {
     }
 
     if (!this.currentProjectId) {
-      this.toast.warning('Cerca prima un progetto tramite il codice.');
+      this.toast.warning('Please search a project by code first.');
       return;
     }
 
@@ -82,7 +82,7 @@ export class UpdateFormComponent implements OnInit {
     this.projectService.changeProjectStatus(payload).subscribe({
       next: (res) => {
         this.isSubmitting = false;
-        this.toast.success(`Progetto aggiornato a '${res.project.project_status}' — visibilità: ${res.project.project_visibility}`);
+        this.toast.success(`Project updated to '${res.project.project_status}' - Visibility: ${res.project.project_visibility}`);
         setTimeout(() => this.router.navigate(['/home']), 2000);
       },
       error: (err: any) => {
@@ -95,24 +95,25 @@ export class UpdateFormComponent implements OnInit {
   private handleError(err: any) {
     switch (err.status) {
       case 400:
-        this.toast.warning(err.error?.error || 'Dati non validi.');
+        this.toast.warning(err.error?.error || 'Invalid data.');
         break;
       case 401:
-        this.toast.error('Sessione scaduta. Effettua di nuovo il login.');
+        this.toast.error('Session expired, please login again.');
         setTimeout(() => this.router.navigate(['/login']), 2000);
         break;
       case 403:
-        this.toast.error('Non hai i permessi per modificare questo progetto.');
+        this.toast.error('You do not have the permissions to modify this project.');
         break;
       case 404:
-        this.toast.error('Progetto non trovato.');
+        this.toast.error('Project not found.');
         break;
       case 500:
-        this.toast.error('Errore interno al server. Riprova più tardi.');
+        this.toast.error('Internal server error, please try again later.');
         break;
       default:
-        this.toast.error('Qualcosa è andato storto. Riprova.');
+        this.toast.error('Something went wrong, please try again later');
     }
+    console.log(err.error)
   }
 
   getVisibility(): string {
