@@ -45,22 +45,22 @@ export class UpdateUserStatusFormComponent {
     next: (res) => {
       const users = res.users || [];
       const matched = users.filter((u: any) => u.email?.toLowerCase() === email);
-
+      this.matchedUsers = matched;
       // ✅ only show Active records — no point moving an already inactive user
-      this.matchedUsers = matched.filter((u: any) =>
-        u.user_status?.toLowerCase() === 'active'
-      );
+      //this.matchedUsers = matched.filter((u: any) =>
+      //  u.user_status?.toLowerCase() === 'active'
+      //);
 
-      if (this.matchedUsers.length === 0) {
+      if (matched.length === 0) {
         this.toast.error('No active user found with this email.');
         this.isSearching = false;
         return;
       }
 
-      if (this.matchedUsers.length === 1) {
-        this.selectUser(this.matchedUsers[0]);
+      if (matched.length === 1) {
+        this.selectUser(matched[0]);
       } else {
-        this.toast.info(`User active in ${this.matchedUsers.length} departments. Select the one to edit.`);
+        this.toast.info(`User found in ${matched.length} departments. Select the one to edit.`);
       }
 
       this.isSearching = false;

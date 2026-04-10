@@ -78,7 +78,7 @@ searchProject() {
       this.projectForm.patchValue({
         projectName:     p.project_name,
         projectStatus:   p.project_status,
-        innovationArea:  p.Innovation_area,
+        innovationArea:  p.innovation_area,
         region:          p.region,
         marketSegment:   p.market_segment,
         notes:           p.notes,

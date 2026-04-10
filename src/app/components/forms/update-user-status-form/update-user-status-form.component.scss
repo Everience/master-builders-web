@@ -151,3 +151,60 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.dept-banners {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.dept-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease, transform 0.15s ease;
+    min-width: 180px;
+
+    &--active {
+        background: #e6f4ee;
+        color: #1a6b3c;
+
+        .dept-banner__status {
+            background: #2ecc71;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+        }
+    }
+
+    &--inactive {
+        background: #fdecea;
+        color: #8b2020;
+
+        .dept-banner__status {
+            background: #e74c3c;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+        }
+    }
+
+    &--selected {
+        border-color: #003087;
+        transform: translateY(-2px);
+    }
+
+    &:hover {
+        border-color: #003087;
+    }
+}

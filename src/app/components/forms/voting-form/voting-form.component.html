@@ -10,7 +10,7 @@
           <option value="">
             {{ isLoadingProjects ? 'Loading projects...' : 'Select a project' }}
           </option>
-          <option *ngFor="let project of allProjects" [value]="project.project_name">
+          <option *ngFor="let project of allProjects" [value]="project.project_id">
             {{ project.project_name }}
           </option>
         </select>

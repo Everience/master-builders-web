@@ -15,15 +15,21 @@
                 </div>
             </div>
             
-            <!-- Multiple rows — pick which department record to edit -->
-            <div class="form-group" *ngIf="matchedUsers.length > 1">
-                <label>Current Department*</label>
-                <select formControlName="selectedRow" (change)="onRowSelected($event)">
-                    <option value="">Select current department</option>
-                    <option *ngFor="let u of matchedUsers" [value]="u.department">
-                        {{ u.department }}
-                    </option>
-                </select>
+            <!-- Department status overview — shown after search -->
+            <div class="form-group" *ngIf="matchedUsers.length > 0">
+                <label>Department Records</label>
+                <div class="dept-banners">
+                    <div *ngFor="let u of matchedUsers" class="dept-banner"
+                        [class.dept-banner--active]="u.user_status?.toLowerCase() === 'active'"
+                        [class.dept-banner--inactive]="u.user_status?.toLowerCase() !== 'active'" (click)="selectUser(u)"
+                        [class.dept-banner--selected]="currentUser?.department === u.department">
+                        <span class="dept-banner__name">{{ u.department.charAt(0).toUpperCase() + u.department.slice(1) }}</span>
+                        <span class="dept-banner__status">{{ u.user_status }}</span>
+                    </div>
+                </div>
+                <p style="font-size: 0.75rem; color: #6b7a99; margin-top: 6px;">
+                    Click a department to select it and edit.
+                </p>
             </div>
             
             <!-- Fields shown after user is selected -->

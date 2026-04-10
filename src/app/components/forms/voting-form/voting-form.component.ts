@@ -62,6 +62,7 @@ export class VotingFormComponent implements OnInit {
           p.project_visibility?.toLowerCase() === 'active'
         );
 
+        console.log(this.allProjects)
         this.isLoadingProjects = false;
 
         //toast if no votable projects
@@ -77,31 +78,31 @@ export class VotingFormComponent implements OnInit {
   }
 
   onProjectSelected(event: Event) {
-    const selectedName = (event.target as HTMLSelectElement).value;
-    const match = this.allProjects.find((p: any) => p.project_name === selectedName);
+  const selectedId = (event.target as HTMLSelectElement).value;
+  const match = this.allProjects.find((p: any) => p.project_id === selectedId); // ✅
 
-    if (!match) {
-      this.currentProjectId = null;
-      this.projectDocsLink = '';
-      this.clearProjectFields();
-      return;
-    }
-
-    this.currentProjectId = match.project_id;
-    this.projectDocsLink = match.attachments_link || '';
-
-    this.votingForm.patchValue({
-      projectStatus:  match.project_status,
-      innovationArea: match.Innovation_area,
-      region:         match.region,
-      marketSegment:  match.market_segment,
-      notes:          match.notes,
-    }, { emitEvent: false });
-
-    ['projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes']
-      .forEach(field => this.votingForm.get(field)!.disable({ emitEvent: false }));
+  if (!match) {
+    this.currentProjectId = null;
+    this.projectDocsLink = '';
+    this.clearProjectFields();
+    return;
   }
 
+  this.currentProjectId = match.project_id;
+  this.projectDocsLink = match.attachments_link || '';
+
+  this.votingForm.patchValue({
+    projectName:    match.project_name,  // ✅ still shows the name in the form
+    projectStatus:  match.project_status,
+    innovationArea: match.innovation_area,
+    region:         match.region,
+    marketSegment:  match.market_segment,
+    notes:          match.notes,
+  }, { emitEvent: false });
+
+  ['projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes']
+    .forEach(field => this.votingForm.get(field)!.disable({ emitEvent: false }));
+}
   clearProjectFields() {
     ['projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes']
       .forEach(field => this.votingForm.get(field)!.enable({ emitEvent: false }));
