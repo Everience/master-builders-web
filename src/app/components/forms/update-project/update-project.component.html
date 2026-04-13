@@ -8,7 +8,43 @@
             <div class="form-group">
                 <label>Project Code</label>
                 <div class="code-input-wrapper">
-                    <input type="text" formControlName="projectCode" (keydown.enter)="$event.preventDefault(); searchProject()" />
+                    <div class="code-autocomplete">
+                        <input
+                            type="text"
+                            formControlName="projectCode"
+                            maxlength="32"
+                            autocomplete="off"
+                            spellcheck="false"
+                            (focus)="onProjectCodeFocus()"
+                            (blur)="onProjectCodeBlur()"
+                            (input)="onProjectCodeInput()"
+                            (keydown)="onProjectCodeKeydown($event)"
+                        />
+                        <div
+                            class="code-suggestions-panel"
+                            *ngIf="showCodeSuggestions && getProjectCodeQuery().length >= minCharsForSuggestions"
+                            (mousedown)="$event.preventDefault()"
+                        >
+                            <div class="code-suggestions-loading" *ngIf="isLoadingProjectCodes">Loading suggestions…</div>
+                            <ul class="code-suggestions" *ngIf="!isLoadingProjectCodes && codeSuggestions.length">
+                                <li
+                                    *ngFor="let s of codeSuggestions; trackBy: trackSuggestionCode; let i = index"
+                                    class="code-suggestion"
+                                    [class.code-suggestion--active]="i === suggestionActiveIndex"
+                                    (mousedown)="selectSuggestion(s, $event)"
+                                >
+                                    <span class="code-suggestion__code">{{ s.code }}</span>
+                                    <span class="code-suggestion__name" *ngIf="s.name">{{ s.name }}</span>
+                                </li>
+                            </ul>
+                            <div class="code-suggestions-empty" *ngIf="!isLoadingProjectCodes && codeSuggestionsLoadError">
+                                Could not load suggestions. Enter the full code and press Search.
+                            </div>
+                            <div class="code-suggestions-empty" *ngIf="!isLoadingProjectCodes && projectCodesLoaded && !codeSuggestions.length && !codeSuggestionsLoadError">
+                                No project codes match this prefix.
+                            </div>
+                        </div>
+                    </div>
                     <button type="button" class="search-btn" (click)="searchProject()" [disabled]="isSearching">
                         <span *ngIf="!isSearching">🔍</span>
                         <span *ngIf="isSearching">⏳</span>

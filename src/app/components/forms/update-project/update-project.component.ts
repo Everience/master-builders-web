@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -8,9 +8,12 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProjectService } from '../../../services/project/project.service';
-import { Subject } from 'rxjs';
 import { ToastService } from '../../../services/project/toast.service';
 
+export interface ProjectCodeSuggestion {
+  code: string;
+  name: string;
+}
 
 @Component({
   selector: 'app-update-project',
@@ -19,11 +22,25 @@ import { ToastService } from '../../../services/project/toast.service';
   templateUrl: './update-project.component.html',
   styleUrl: './update-project.component.scss'
 })
-export class UpdateProjectComponent implements OnInit {
+export class UpdateProjectComponent implements OnInit, OnDestroy {
   currentProjectId: string | null = null;
   isSearching = false;
   isSubmitting = false;
   projectForm!: FormGroup;
+
+  private loadedProjectCodeLower: string | null = null;
+
+  readonly minCharsForSuggestions = 3;
+  readonly maxSuggestions = 20;
+
+  isLoadingProjectCodes = false;
+  projectCodesLoaded = false;
+  codeSuggestionsLoadError = false;
+  private projectCatalog: ProjectCodeSuggestion[] = [];
+  codeSuggestions: ProjectCodeSuggestion[] = [];
+  showCodeSuggestions = false;
+  suggestionActiveIndex = -1;
+  private blurCloseTimer: ReturnType<typeof setTimeout> | null = null;
   regions = ['AMET', 'ANZ', 'EU', 'GLOBAL', 'BA', 'SA'];
   marketSegments = ['AS', 'CA', 'CS', 'FIBERS', 'UGC', 'VTG'];
   innovationAreas = [
@@ -62,16 +79,190 @@ export class UpdateProjectComponent implements OnInit {
   });
 }
 
+  ngOnDestroy(): void {
+    this.clearBlurTimer();
+  }
+
+  private clearBlurTimer(): void {
+    if (this.blurCloseTimer != null) {
+      clearTimeout(this.blurCloseTimer);
+      this.blurCloseTimer = null;
+    }
+  }
+
+  loadProjectCodesForAutocomplete(): void {
+    if (this.isLoadingProjectCodes || this.projectCodesLoaded) {
+      this.refreshCodeSuggestions();
+      return;
+    }
+    this.isLoadingProjectCodes = true;
+    this.projectService.getProjects().subscribe({
+      next: (res) => {
+        const projects = res.projects || res || [];
+        const byLower = new Map<string, ProjectCodeSuggestion>();
+        for (const p of projects) {
+          const raw = (p as { project_code?: string }).project_code;
+          if (raw == null || String(raw).trim() === '') continue;
+          const code = String(raw).trim();
+          const key = code.toLowerCase();
+          if (!byLower.has(key)) {
+            byLower.set(key, {
+              code,
+              name: String((p as { project_name?: string }).project_name || ''),
+            });
+          }
+        }
+        this.projectCatalog = Array.from(byLower.values()).sort((a, b) =>
+          a.code.toLowerCase().localeCompare(b.code.toLowerCase())
+        );
+        this.projectCodesLoaded = true;
+        this.codeSuggestionsLoadError = false;
+        this.isLoadingProjectCodes = false;
+        this.refreshCodeSuggestions();
+      },
+      error: () => {
+        this.isLoadingProjectCodes = false;
+        this.codeSuggestionsLoadError = true;
+        this.toast.error('Could not load project list for code suggestions.');
+      },
+    });
+  }
+
+  onProjectCodeFocus(): void {
+    this.clearBlurTimer();
+    this.loadProjectCodesForAutocomplete();
+    this.showCodeSuggestions = true;
+    this.refreshCodeSuggestions();
+  }
+
+  onProjectCodeInput(): void {
+    const q = this.getProjectCodeQuery();
+    if (
+      this.currentProjectId &&
+      this.loadedProjectCodeLower &&
+      q.toLowerCase() !== this.loadedProjectCodeLower
+    ) {
+      this.currentProjectId = null;
+      this.loadedProjectCodeLower = null;
+      this.clearAutofilledFields();
+    }
+    this.showCodeSuggestions = true;
+    this.suggestionActiveIndex = -1;
+    if (this.getProjectCodeQuery().length >= this.minCharsForSuggestions) {
+      this.loadProjectCodesForAutocomplete();
+    }
+    this.refreshCodeSuggestions();
+  }
+
+  onProjectCodeBlur(): void {
+    this.clearBlurTimer();
+    this.blurCloseTimer = setTimeout(() => {
+      this.showCodeSuggestions = false;
+      this.suggestionActiveIndex = -1;
+      this.blurCloseTimer = null;
+    }, 180);
+  }
+
+  onProjectCodeKeydown(event: KeyboardEvent): void {
+    const hasPanel =
+      this.showCodeSuggestions &&
+      this.getProjectCodeQuery().length >= this.minCharsForSuggestions &&
+      (this.codeSuggestions.length > 0 || this.isLoadingProjectCodes);
+
+    if (event.key === 'ArrowDown' && hasPanel && this.codeSuggestions.length > 0) {
+      event.preventDefault();
+      this.suggestionActiveIndex = Math.min(
+        this.suggestionActiveIndex + 1,
+        this.codeSuggestions.length - 1
+      );
+      return;
+    }
+    if (event.key === 'ArrowUp' && hasPanel && this.codeSuggestions.length > 0) {
+      event.preventDefault();
+      this.suggestionActiveIndex = Math.max(this.suggestionActiveIndex - 1, -1);
+      return;
+    }
+    if (event.key === 'Escape' && this.showCodeSuggestions) {
+      event.preventDefault();
+      this.showCodeSuggestions = false;
+      this.suggestionActiveIndex = -1;
+      return;
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      if (
+        this.showCodeSuggestions &&
+        this.codeSuggestions.length === 1 &&
+        this.suggestionActiveIndex < 0
+      ) {
+        this.applySuggestion(this.codeSuggestions[0]);
+        return;
+      }
+      if (
+        this.showCodeSuggestions &&
+        this.codeSuggestions.length > 0 &&
+        this.suggestionActiveIndex >= 0
+      ) {
+        this.applySuggestion(this.codeSuggestions[this.suggestionActiveIndex]);
+      } else {
+        this.searchProject();
+      }
+    }
+  }
+
+  selectSuggestion(suggestion: ProjectCodeSuggestion, event: MouseEvent): void {
+    event.preventDefault();
+    this.applySuggestion(suggestion);
+  }
+
+  private applySuggestion(suggestion: ProjectCodeSuggestion): void {
+    this.clearBlurTimer();
+    this.showCodeSuggestions = false;
+    this.suggestionActiveIndex = -1;
+    this.projectForm.patchValue({ projectCode: suggestion.code }, { emitEvent: false });
+    this.searchProject();
+  }
+
+  getProjectCodeQuery(): string {
+    const raw = this.projectForm?.get('projectCode')?.value;
+    return raw != null ? String(raw).trim() : '';
+  }
+
+  refreshCodeSuggestions(): void {
+    const q = this.getProjectCodeQuery();
+    const qLower = q.toLowerCase();
+
+    if (q.length < this.minCharsForSuggestions) {
+      this.codeSuggestions = [];
+      this.suggestionActiveIndex = -1;
+      return;
+    }
+
+    this.codeSuggestions = this.projectCatalog
+      .filter((row) => row.code.toLowerCase().startsWith(qLower))
+      .slice(0, this.maxSuggestions);
+    if (this.suggestionActiveIndex >= this.codeSuggestions.length) {
+      this.suggestionActiveIndex = this.codeSuggestions.length ? this.codeSuggestions.length - 1 : -1;
+    }
+  }
+
+  trackSuggestionCode(_: number, s: ProjectCodeSuggestion): string {
+    return s.code.toLowerCase();
+  }
+
 searchProject() {
   const code = this.projectForm.get('projectCode')?.value?.trim();
   if (!code) return;
 
   this.isSearching = true;
+  this.showCodeSuggestions = false;
+  this.suggestionActiveIndex = -1;
 
   this.projectService.getProjectByCode(code).subscribe({
     next: (res) => {
       const p = res.project;
       this.currentProjectId = p.project_id;
+      this.loadedProjectCodeLower = code.toLowerCase();
       this.existingFiles = res.files || []; 
       this.attachmentsLink = p.attachments_link || '';
 
@@ -95,6 +286,7 @@ searchProject() {
       error: (err: any) => {
         this.isSearching = false;
         this.currentProjectId = null;
+        this.loadedProjectCodeLower = null;
         this.clearAutofilledFields();
         this.handleError(err);
       }
@@ -102,6 +294,7 @@ searchProject() {
   }
 
   clearAutofilledFields() {
+    this.loadedProjectCodeLower = null;
     ['projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment']
       .forEach(field => this.projectForm.get(field)!.enable({ emitEvent: false }));
 
