@@ -23,7 +23,7 @@
             </div>
 
             <div class="form-group" *ngIf="currentProjectId">
-                <label>Resulting Visibility</label>
+                <label>Resulting Visibility Preview</label>
                 <div class="visibility-hint" [class.active]="getVisibility() === 'active'"
                     [class.inactive]="getVisibility() === 'inactive'">
                     {{ getVisibilityLabel() }}
