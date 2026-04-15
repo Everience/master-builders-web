@@ -12,7 +12,7 @@ app.http("ChangeUserStatus", {
     if (preflight) return preflight;
 
     try {
-      // 🔑 Autenticazione e autorizzazione
+      // Autenticazione e autorizzazione
       const user = await withAuth(request, context);
       requireRole(user, "admin");
 
