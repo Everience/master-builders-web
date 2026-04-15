@@ -11,7 +11,6 @@ const {
   deleteFileFromSharePoint,
   getFolderUrl,
 } = require("../../uploadFileToSharePoint.js");
-// ✅ Rimosso import inutilizzato: getGraphClient
 
 function generateProjectId() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -81,7 +80,7 @@ app.http("CreateProjectFilesSP", {
       }
       cleaned = cleanedData;
 
-      // Check project code uniqueness
+      //check project code
       const existingCode = await transaction
         .request()
         .input("project_code", cleaned.project_code)
@@ -99,7 +98,6 @@ app.http("CreateProjectFilesSP", {
         });
       }
 
-      // Generate unique projectId
       let exists;
       do {
         projectId = generateProjectId();
@@ -139,7 +137,7 @@ app.http("CreateProjectFilesSP", {
         `);
 
       const uploadedUrls = [];
-      const uploadedFilenames = []; // ✅ traccia solo i file effettivamente caricati
+      const uploadedFilenames = [];
 
       try {
         for (const file of uploadedFiles) {
@@ -150,7 +148,7 @@ app.http("CreateProjectFilesSP", {
             file.filename
           );
           uploadedUrls.push(url);
-          uploadedFilenames.push(file.filename); // ✅ aggiunto dopo upload riuscito
+          uploadedFilenames.push(file.filename);
 
           await transaction
             .request()
@@ -181,7 +179,7 @@ app.http("CreateProjectFilesSP", {
           `);
         }
       } catch (err) {
-        // ✅ Rollback solo dei file già caricati con successo su SharePoint
+        //Rollback solo dei file già caricati con successo su SharePoint
         for (const filename of uploadedFilenames) {
           try {
             await deleteFileFromSharePoint(

@@ -72,7 +72,7 @@ app.http("VoteProject", {
           });
         }
 
-        if (project.recordset[0].project_status !== "In Progress") {
+        if (project.recordset[0].project_visibility !== "Active") {
           await transaction.rollback();
           return withCors({
             status: 400,
@@ -81,7 +81,7 @@ app.http("VoteProject", {
           });
         }
 
-        // 2️⃣ verifica utente con email e stato Active
+        // // verifica utente
         const userCheck = await transaction
           .request()
           .input("user_email", user_email)
@@ -91,7 +91,6 @@ app.http("VoteProject", {
               WHERE email = @user_email AND user_status = 'Active'`
           );
 
-        // Se non esiste nessun utente attivo
         if (userCheck.recordset.length === 0) {
           await transaction.rollback();
           return withCors({
@@ -101,7 +100,6 @@ app.http("VoteProject", {
           });
         }
 
-        // Se ci sono più utenti attivi con la stessa email
         if (userCheck.recordset.length > 1) {
           await transaction.rollback();
           return withCors({
@@ -115,7 +113,7 @@ app.http("VoteProject", {
 
         const user_id_internal = userCheck.recordset[0].user_id_internal;
 
-        // 3️⃣ verifica voto duplicato
+        // verifica voto duplicato
         const voteCheck = await transaction
           .request()
           .input("project_id", project_id)
@@ -133,7 +131,7 @@ app.http("VoteProject", {
           });
         }
 
-        // 4️⃣ inserisce il voto
+        // votazione
         const result = await transaction
           .request()
           .input("project_id", project_id)

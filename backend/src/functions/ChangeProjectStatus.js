@@ -4,13 +4,6 @@ const { handleCors, withCors } = require("../../cors.js");
 const withAuth = require("../auth/withAuth.js");
 const requireRole = require("../auth/requireRole.js");
 
-const statusVisibilityMap = {
-  Killed: "inactive",
-  "On Hold": "inactive",
-  Completed: "inactive",
-  "In Progress": "active",
-};
-
 app.http("ChangeProjectStatus", {
   methods: ["POST", "OPTIONS"],
   authLevel: "anonymous",
@@ -23,9 +16,9 @@ app.http("ChangeProjectStatus", {
       requireRole(user, "admin");
 
       const body = await request.json();
-      const { project_id, status } = body;
+      const { project_id, status, visibility } = body;
 
-      // 🔹 Validazioni
+      //validazioni
       if (!project_id) {
         return withCors({
           status: 400,
@@ -33,17 +26,14 @@ app.http("ChangeProjectStatus", {
         });
       }
 
-      if (!status || !statusVisibilityMap[status]) {
+      if (!status) {
         return withCors({
           status: 400,
           body: JSON.stringify({
-            error: "Invalid status",
-            allowed: Object.keys(statusVisibilityMap),
+            error: "status/visibility are required",
           }),
         });
       }
-
-      const visibility = statusVisibilityMap[status];
 
       const pool = await getConnection();
 
@@ -69,7 +59,7 @@ app.http("ChangeProjectStatus", {
       return withCors({
         status: 200,
         body: JSON.stringify({
-          message: `Project updated to '${status}'`,
+          message: `Project updated to status: '${status}' and visibility: '${visibility}'`,
           project: result.recordset[0],
         }),
       });
