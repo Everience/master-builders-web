@@ -79,7 +79,7 @@ export class VotingFormComponent implements OnInit {
 
   onProjectSelected(event: Event) {
   const selectedId = (event.target as HTMLSelectElement).value;
-  const match = this.allProjects.find((p: any) => p.project_id === selectedId); // ✅
+  const match = this.allProjects.find((p: any) => p.project_id === selectedId);
 
   if (!match) {
     this.currentProjectId = null;
@@ -92,7 +92,7 @@ export class VotingFormComponent implements OnInit {
   this.projectDocsLink = match.attachments_link || '';
 
   this.votingForm.patchValue({
-    projectName:    match.project_name,  // ✅ still shows the name in the form
+    projectName:    match.project_name, //still shows the name in the form
     projectStatus:  match.project_status,
     innovationArea: match.innovation_area,
     region:         match.region,
