@@ -3,6 +3,8 @@ const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
 const withAuth = require("../auth/withAuth.js");
 const requireRole = require("../auth/requireRole.js");
+const allowedStatus = ["In Progress", "On Hold", "Completed", "Killed"];
+const allowedVisibility = ["Active", "Inactive"];
 
 app.http("ChangeProjectStatus", {
   methods: ["POST", "OPTIONS"],
@@ -16,7 +18,7 @@ app.http("ChangeProjectStatus", {
       requireRole(user, "admin");
 
       const body = await request.json();
-      const { project_id, status, visibility } = body;
+      const { project_id, status, project_visibility } = body;
 
       //validazioni
       if (!project_id) {
@@ -26,11 +28,29 @@ app.http("ChangeProjectStatus", {
         });
       }
 
-      if (!status) {
+      if (!status || !project_visibility) {
         return withCors({
           status: 400,
           body: JSON.stringify({
             error: "status/visibility are required",
+          }),
+        });
+      }
+
+      if (!allowedStatus.includes(status)) {
+        return withCors({
+          status: 400,
+          body: JSON.stringify({
+            error: "Invalid status value",
+          }),
+        });
+      }
+
+      if (!allowedVisibility.includes(project_visibility)) {
+        return withCors({
+          status: 400,
+          body: JSON.stringify({
+            error: "Invalid visibility value",
           }),
         });
       }
@@ -41,7 +61,7 @@ app.http("ChangeProjectStatus", {
         .request()
         .input("project_id", project_id)
         .input("status", status)
-        .input("visibility", visibility).query(`
+        .input("visibility", project_visibility).query(`
           UPDATE Projects
           SET project_status = @status,
               project_visibility = @visibility
@@ -59,7 +79,7 @@ app.http("ChangeProjectStatus", {
       return withCors({
         status: 200,
         body: JSON.stringify({
-          message: `Project updated to status: '${status}' and visibility: '${visibility}'`,
+          message: `Project updated to status: '${status}' and visibility: '${project_visibility}'`,
           project: result.recordset[0],
         }),
       });

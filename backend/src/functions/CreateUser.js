@@ -23,6 +23,7 @@ app.http("CreateUser", {
       user_name = user_name?.trim().toLowerCase();
       department = department?.trim();
       role = role?.trim();
+      const user_internal_id = `${email}|${department.toLowerCase()}`;
 
       //vlidazioni
       if (!email || !user_name || !department || !role) {
@@ -66,16 +67,16 @@ app.http("CreateUser", {
         });
       }
 
-      // ➕ Inserimento
+      // Insert
       const insertResult = await pool
         .request()
         .input("email", email)
         .input("user_name", user_name)
         .input("department", department)
         .input("role", role).query(`
-          INSERT INTO Users (email, user_name, department, role, user_status)
+          INSERT INTO Users (email, user_name, department, role, user_status, user_internal_id)
           OUTPUT INSERTED.*
-          VALUES (@email, @user_name, @department, @role, 'Active')
+          VALUES (@email, @user_name, @department, @role, 'Active', @user_internal_id)
         `);
 
       return withCors({
