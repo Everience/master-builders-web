@@ -1,67 +1,202 @@
 <button class="back-btn" (click)="goBack()">Back to Home</button>
+
 <div class="main">
-    <div class="form-container">
+  <div class="form-container">
+    <h2 class="page-title">User management</h2>
+    <p class="page-lead">
+      Look up a user by email to adjust their department assignment, or create a new one.
+    </p>
 
-        <form [formGroup]="userStatusForm" (ngSubmit)="onSubmit()" class="voting-form">
-            <div class="form-group">
-                <label>User Email*</label>
-                <div class="code-input-wrapper">
-                    <input type="email" formControlName="userEmail" (keydown.enter)="$event.preventDefault(); searchUser()"
-                        placeholder="user@company.com" />
-                    <button type="button" class="search-btn" (click)="searchUser()" [disabled]="isSearching">
-                        <span *ngIf="!isSearching">🔍</span>
-                        <span *ngIf="isSearching">⏳</span>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Department status overview — shown after search -->
-            <div class="form-group" *ngIf="matchedUsers.length > 0">
-                <label>Department Records</label>
-                <div class="dept-banners">
-                    <div *ngFor="let u of matchedUsers" class="dept-banner"
-                        [class.dept-banner--active]="u.user_status?.toLowerCase() === 'active'"
-                        [class.dept-banner--inactive]="u.user_status?.toLowerCase() !== 'active'" (click)="selectUser(u)"
-                        [class.dept-banner--selected]="currentUser?.department === u.department">
-                        <span class="dept-banner__name">{{ u.department.charAt(0).toUpperCase() + u.department.slice(1) }}</span>
-                        <span class="dept-banner__status">{{ u.user_status }}</span>
-                    </div>
-                </div>
-                <p style="font-size: 0.75rem; color: #6b7a99; margin-top: 6px;">
-                    Click a department to select it and edit.
-                </p>
-            </div>
-            
-            <!-- Fields shown after user is selected -->
-            <ng-container *ngIf="currentUser">
-                <div class="form-group">
-                    <label>New Department*</label>
-                    <select formControlName="newDepartment">
-                        <option value="">Select department</option>
-                        <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>User Status*</label>
-                    <div class="radio-buttons-container">
-                        <div class="radio-label-container">
-                            <input type="radio" formControlName="userStatus" value="active" id="active" />
-                            <label for="active">Active</label>
-                        </div>
-                        <div class="radio-label-container">
-                            <input type="radio" formControlName="userStatus" value="inactive" id="inactive" />
-                            <label for="inactive">Inactive</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="button-container">
-                    <button type="submit" [disabled]="userStatusForm.invalid || isSubmitting || !currentUser">
-                        {{ isSubmitting ? 'Saving...' : 'Submit' }}
-                    </button>
-                </div>
-            </ng-container>
-        </form>
+    <div class="mode-tabs" role="tablist" aria-label="Mode">
+      <button
+        type="button"
+        role="tab"
+        class="mode-tab"
+        [class.mode-tab--active]="mode === 'manage'"
+        [attr.aria-selected]="mode === 'manage'"
+        (click)="setMode('manage')"
+      >
+        Manage existing user
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="mode-tab"
+        [class.mode-tab--active]="mode === 'create'"
+        [attr.aria-selected]="mode === 'create'"
+        (click)="setMode('create')"
+      >
+        Create new user
+      </button>
     </div>
-</div>
 
+    <section *ngIf="mode === 'manage'" class="panel">
+      <form [formGroup]="searchForm" (ngSubmit)="searchUsers()" class="search-form">
+        <div class="form-group">
+          <label>User email</label>
+          <div class="search-wrapper">
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="user@company.com"
+              autocomplete="off"
+              (input)="onEmailChanged()"
+              (keydown.enter)="$event.preventDefault(); searchUsers()"
+            />
+            <button
+              type="submit"
+              class="search-btn"
+              [disabled]="searchForm.invalid || isSearching"
+            >
+              <span *ngIf="!isSearching">Search</span>
+              <span *ngIf="isSearching">Searching…</span>
+            </button>
+          </div>
+          <p class="field-hint" *ngIf="searchForm.get('email')?.touched && searchForm.get('email')?.invalid">
+            Enter a valid email.
+          </p>
+        </div>
+      </form>
+
+      <ng-container *ngIf="hasSearched">
+        <div class="empty-state" *ngIf="!records.length">
+          <p>No user found with <strong>{{ searchedEmail }}</strong>.</p>
+          <button
+            type="button"
+            class="link-btn"
+            (click)="setMode('create'); createForm.patchValue({ email: searchedEmail })"
+          >
+            Create a new user with this email
+          </button>
+        </div>
+
+        <div class="user-card" *ngIf="records.length">
+          <header class="user-card__head">
+            <div class="user-card__identity">
+              <div class="user-card__name-row">
+                <span class="user-card__name">{{ displayUserName || '—' }}</span>
+                <span class="role-tag" [class.role-tag--admin]="displayRole === 'Admin'">
+                  {{ displayRole }}
+                </span>
+              </div>
+              <div class="user-card__email">{{ displayEmail }}</div>
+            </div>
+            <div class="user-card__status">
+              <span class="status-label">Active in</span>
+              <span
+                class="status-value"
+                [class.status-value--none]="!hasActiveDept"
+              >
+                {{ hasActiveDept ? activeDeptLabel : '—' }}
+              </span>
+            </div>
+          </header>
+
+          <p class="user-card__rule">
+            Only one department can be <strong>Active</strong> at a time. Activating or assigning a department
+            will deactivate any other currently active one.
+          </p>
+
+          <ul class="dept-list">
+            <li
+              *ngFor="let cell of deptCells; trackBy: trackByDept"
+              class="dept-row"
+              [class.dept-row--active]="cell.state === 'active'"
+              [class.dept-row--inactive]="cell.state === 'inactive'"
+              [class.dept-row--none]="cell.state === 'none'"
+              [class.dept-row--busy]="busyDept === cell.department"
+            >
+              <div class="dept-row__main">
+                <div class="dept-row__name">{{ cell.department }}</div>
+                <div class="dept-row__meta">
+                  <span
+                    class="pill"
+                    [class.pill--active]="cell.state === 'active'"
+                    [class.pill--inactive]="cell.state === 'inactive'"
+                    [class.pill--none]="cell.state === 'none'"
+                  >
+                    {{ cell.state === 'active' ? 'Active' : cell.state === 'inactive' ? 'Inactive' : 'Not assigned' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="dept-row__actions">
+                <button
+                  *ngIf="cell.state === 'active'"
+                  type="button"
+                  class="chip-btn chip-btn--warn"
+                  [disabled]="busyDept !== null"
+                  (click)="deactivate(cell)"
+                >
+                  {{ busyDept === cell.department ? 'Saving…' : 'Deactivate' }}
+                </button>
+
+                <button
+                  *ngIf="cell.state === 'inactive'"
+                  type="button"
+                  class="chip-btn"
+                  [disabled]="busyDept !== null"
+                  (click)="activate(cell)"
+                >
+                  {{ busyDept === cell.department ? 'Saving…' : 'Activate' }}
+                </button>
+
+                <button
+                  *ngIf="cell.state === 'none'"
+                  type="button"
+                  class="chip-btn chip-btn--ghost"
+                  [disabled]="busyDept !== null || !records.length"
+                  (click)="assign(cell)"
+                >
+                  {{ busyDept === cell.department ? 'Assigning…' : 'Assign here' }}
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </ng-container>
+    </section>
+
+    <section *ngIf="mode === 'create'" class="panel">
+      <form [formGroup]="createForm" (ngSubmit)="createUser()" class="create-form">
+        <div class="form-group">
+          <label>Email*</label>
+          <input type="email" formControlName="email" placeholder="user@company.com" autocomplete="off" />
+          <p class="field-hint" *ngIf="createForm.get('email')?.touched && createForm.get('email')?.invalid">
+            Enter a valid email.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>Full name*</label>
+          <input type="text" formControlName="user_name" placeholder="Name Surname" />
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Department*</label>
+            <select formControlName="department">
+              <option value="">Select department</option>
+              <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Role*</label>
+            <select formControlName="role">
+              <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="inline-note">The new user is created with status <strong>Active</strong>.</p>
+
+        <div class="button-container">
+          <button type="submit" [disabled]="createForm.invalid || isCreating">
+            {{ isCreating ? 'Creating…' : 'Create user' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>

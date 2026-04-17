@@ -77,6 +77,26 @@ export class ProjectFormComponent {
     document.getElementById('fileInput')?.click();
   }
 
+  getFileIcon(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'pdf':
+        return '📄';
+      case 'doc':
+      case 'docx':
+        return '📝';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return '🖼️';
+      case 'xls':
+      case 'xlsx':
+        return '📊';
+      default:
+        return '📁';
+    }
+  }
+
   onSubmit() {
   if (this.projectForm.invalid) {
     this.projectForm.markAllAsTouched();

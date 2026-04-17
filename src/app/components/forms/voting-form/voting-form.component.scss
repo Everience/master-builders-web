@@ -56,6 +56,12 @@
     }
   }
 
+  .readonly-dim {
+    cursor: default;
+    color: #6b7a99;
+    background-color: #f0f0f0;
+  }
+
   .file-list {
     margin-top: 0.5rem;
     list-style: none;

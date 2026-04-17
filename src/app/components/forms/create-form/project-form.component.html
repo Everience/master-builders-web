@@ -63,19 +63,31 @@
       <div class="form-group">
         <label>
           Attachments
-          <br>
-          <span style="font-size: 0.75rem;">Max 10 files, up to 10MB each — PDF, Word, JPG supported</span>
+          <span class="attachments-hint">Max 10 files, up to 10MB each — PDF, Word, Excel, images</span>
         </label>
-        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" (change)="onFileSelected($event)"
-          style="display: none;" />
-        
-        <button type="button" class="file-upload-btn" (click)="triggerFileInput()">
-          <img src="../../../../assets/icons/folder (2).png" alt="folder-icon" style="width: 15px;">
-          Choose Files
+        <input
+          type="file"
+          id="fileInput"
+          multiple
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx,.xls"
+          (change)="onFileSelected($event)"
+          class="file-input-hidden"
+        />
+        <button type="button" class="file-chip file-chip--action" (click)="triggerFileInput()">
+          <img src="../../../../assets/icons/folder (2).png" alt="" class="file-chip__img" />
+          <span>Choose files</span>
         </button>
-        <p *ngIf="uploadedFiles.length === 0" style="font-size: 0.8rem; color: #6b7a99; margin-top: 6px;">
-          No files selected
-        </p>
+        <p class="attachments-empty" *ngIf="uploadedFiles.length === 0">No files selected yet.</p>
+        <ul class="file-list" *ngIf="uploadedFiles.length">
+          <li *ngFor="let file of uploadedFiles; let i = index">
+            <span class="file-list__main">
+              <span class="file-list__icon">{{ getFileIcon(file.name) }}</span>
+              <span class="file-list__name">{{ file.name }}</span>
+              <span class="file-list__size">({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span>
+            </span>
+            <button type="button" class="file-list__remove" (click)="removeFile(i)">Remove</button>
+          </li>
+        </ul>
       </div>
 
       <div class="button-container">
