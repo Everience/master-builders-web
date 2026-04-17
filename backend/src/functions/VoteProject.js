@@ -60,7 +60,7 @@ app.http("VoteProject", {
           .request()
           .input("project_id", project_id)
           .query(
-            "SELECT project_status FROM Projects WHERE project_id = @project_id"
+            "SELECT project_visibility FROM Projects WHERE project_id = @project_id"
           );
 
         if (project.recordset.length === 0) {
