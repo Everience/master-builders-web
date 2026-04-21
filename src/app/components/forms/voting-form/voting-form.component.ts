@@ -38,6 +38,16 @@ export class VotingFormComponent implements OnInit {
     return this.currentProjectId != null;
   }
 
+  get currentScore(): number | null {
+    const v = this.votingForm?.get('score')?.value;
+    return v === '' || v == null ? null : Number(v);
+  }
+
+  setScore(n: number): void {
+    this.votingForm.patchValue({ score: n });
+    this.votingForm.get('score')?.markAsTouched();
+  }
+
   constructor(
     private fb: FormBuilder,
     private router: Router,

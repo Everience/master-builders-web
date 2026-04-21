@@ -35,14 +35,39 @@
         <div class="form-group">
           <label>User email</label>
           <div class="search-wrapper">
-            <input
-              type="email"
-              formControlName="email"
-              placeholder="user@company.com"
-              autocomplete="off"
-              (input)="onEmailChanged()"
-              (keydown.enter)="$event.preventDefault(); searchUsers()"
-            />
+            <div class="email-autocomplete">
+              <input
+                type="email"
+                formControlName="email"
+                placeholder="user@company.com"
+                autocomplete="off"
+                spellcheck="false"
+                (focus)="onEmailFocus()"
+                (blur)="onEmailBlur()"
+                (input)="onEmailChanged()"
+                (keydown)="onEmailKeydown($event)"
+              />
+              <div
+                class="email-suggestions-panel"
+                *ngIf="showEmailSuggestions && (emailSuggestions.length || catalogLoading)"
+                (mousedown)="$event.preventDefault()"
+              >
+                <div class="email-suggestions-loading" *ngIf="catalogLoading && !emailSuggestions.length">
+                  Loading users…
+                </div>
+                <ul class="email-suggestions" *ngIf="emailSuggestions.length">
+                  <li
+                    *ngFor="let s of emailSuggestions; trackBy: trackByEmail; let i = index"
+                    class="email-suggestion"
+                    [class.email-suggestion--active]="i === emailActiveIndex"
+                    (mousedown)="selectEmail(s, $event)"
+                  >
+                    <span class="email-suggestion__email">{{ s.email }}</span>
+                    <span class="email-suggestion__name" *ngIf="s.user_name">{{ s.user_name }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
             <button
               type="submit"
               class="search-btn"

@@ -1,9 +1,27 @@
 <div class="project-search-autocomplete">
-  <div class="search-mode-toggle">
-    <button type="button" [class.active]="searchMode === 'code'" (click)="setSearchMode('code')">Code</button>
-    <button type="button" [class.active]="searchMode === 'name'" (click)="setSearchMode('name')">Name</button>
+  <div class="search-mode-toggle" role="tablist" aria-label="Search mode">
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="searchMode === 'code'"
+      [class.active]="searchMode === 'code'"
+      (click)="setSearchMode('code')"
+    >Code</button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="searchMode === 'name'"
+      [class.active]="searchMode === 'name'"
+      (click)="setSearchMode('name')"
+    >Name</button>
   </div>
-  <span class="field-hint">Type at least 3 characters. Code matches the start of the code. Name matches any part of the name. Not case-sensitive.</span>
+
+  <p class="field-hint">
+    Type at least 3 characters.
+    {{ searchMode === 'code' ? 'Code matches the start of the code.' : 'Name matches any part of the name.' }}
+    Not case-sensitive.
+  </p>
+
   <div class="code-input-wrapper">
     <div class="code-autocomplete">
       <input
@@ -12,6 +30,7 @@
         maxlength="256"
         autocomplete="off"
         spellcheck="false"
+        [placeholder]="searchMode === 'code' ? 'Enter project code…' : 'Enter project name…'"
         [value]="query"
         (focus)="onFocus()"
         (blur)="onBlur()"
@@ -50,9 +69,19 @@
         </div>
       </div>
     </div>
-    <button type="button" class="search-btn" (click)="onSearchClick()" [disabled]="disabled || searchButtonBusy">
-      <span *ngIf="!searchButtonBusy">🔍</span>
-      <span *ngIf="searchButtonBusy">⏳</span>
+
+    <button
+      type="button"
+      class="search-btn"
+      [attr.aria-label]="'Search'"
+      (click)="onSearchClick()"
+      [disabled]="disabled || searchButtonBusy"
+    >
+      <svg *ngIf="!searchButtonBusy" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+        <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="search-btn__spinner" *ngIf="searchButtonBusy" aria-hidden="true"></span>
     </button>
   </div>
 </div>

@@ -1,11 +1,14 @@
 <button class="back-btn" (click)="goBack()">Back to Home</button>
-<div class="main">
+<div class="form-page">
   <div class="form-container">
+    <h2 class="page-title">Vote for a project</h2>
+    <p class="page-lead">Select an open project, review its details, then rate and explain your vote.</p>
 
     <form [formGroup]="votingForm" (ngSubmit)="onSubmit()" class="voting-form">
 
+      <div class="section-heading">Project</div>
       <div class="form-group">
-        <label>Project*</label>
+        <label>Search project</label>
         <app-project-search-autocomplete
           formControlName="projectLookup"
           [filterVotableOnly]="true"
@@ -14,69 +17,88 @@
         />
       </div>
 
-      <div class="form-group">
-        <label>Project code</label>
-        <input type="text" formControlName="projectCode" readonly class="readonly-dim" />
-      </div>
-      <div class="form-group">
-        <label>Project name</label>
-        <input type="text" formControlName="projectName" readonly class="readonly-dim" />
-      </div>
+      <ng-container *ngIf="hasSelectedProject">
+        <div class="form-group">
+          <label>Project code</label>
+          <input type="text" formControlName="projectCode" readonly class="readonly-dim" />
+        </div>
+        <div class="form-group">
+          <label>Project name</label>
+          <input type="text" formControlName="projectName" readonly class="readonly-dim" />
+        </div>
 
-      <div class="form-group">
-        <label>Project Status</label>
-        <input type="text" formControlName="projectStatus" readonly />
-      </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Status</label>
+            <input type="text" formControlName="projectStatus" readonly class="readonly-dim" />
+          </div>
+          <div class="form-group">
+            <label>Innovation area</label>
+            <input type="text" formControlName="innovationArea" readonly class="readonly-dim" />
+          </div>
+          <div class="form-group">
+            <label>Region</label>
+            <input type="text" formControlName="region" readonly class="readonly-dim" />
+          </div>
+          <div class="form-group">
+            <label>Market segment</label>
+            <input type="text" formControlName="marketSegment" readonly class="readonly-dim" />
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label>Innovation Area</label>
-        <input type="text" formControlName="innovationArea" readonly />
-      </div>
-      
-      <div class="form-group">
-        <label>Region</label>
-        <input type="text" formControlName="region" readonly />
-      </div>
-      
-      <div class="form-group">
-        <label>Market Segment</label>
-        <input type="text" formControlName="marketSegment" readonly />
-      </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea formControlName="notes" rows="3" readonly class="readonly-dim"></textarea>
+        </div>
 
-      <div class="form-group" *ngIf="projectDocsLink">
-        <label>Project Documentation</label>
-        <a [href]="projectDocsLink" target="_blank" class="file-chip">
-          <span class="file-chip__icon">📁</span>
-          <span class="file-chip__name">View project files on SharePoint</span>
-        </a>
-      </div>
+        <div class="form-group" *ngIf="projectDocsLink">
+          <label>Documentation</label>
+          <a [href]="projectDocsLink" target="_blank" class="file-chip">
+            <img src="../../../../assets/icons/folder (2).png" alt="" class="file-chip__img" />
+            <span class="file-chip__name">View project files on SharePoint</span>
+          </a>
+        </div>
 
-      <div class="form-group">
-        <label>Notes</label>
-        <textarea formControlName="notes" rows="3"></textarea>
-      </div>
+        <div class="section-heading">Your vote</div>
 
-      <div class="form-group">
-        <label>Score*<br>
-          <span style="font-size: 0.75rem;">Rate from 1 (low) to 5 (high)</span><br>
-          <span style="font-size: 0.75rem;">- Sales & Marketing voters: market potential</span><br>
-          <span style="font-size: 0.75rem;">- Technical voters: technical probability of success</span>
-        </label>
-        <select formControlName="score">
-          <option value="">Select score</option>
-          <option *ngFor="let score of scores" [value]="score">{{ score }}</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label>
+            Score
+            <span class="editable-hint">Editable</span>
+          </label>
+          <div class="score-picker" role="radiogroup" aria-label="Score">
+            <button
+              type="button"
+              *ngFor="let n of scores"
+              class="score-picker__item"
+              [class.score-picker__item--active]="currentScore === n"
+              [attr.aria-checked]="currentScore === n"
+              role="radio"
+              (click)="setScore(n)"
+            >{{ n }}</button>
+          </div>
+          <div class="score-picker__scale">
+            <span>1 — Low</span>
+            <span>5 — High</span>
+          </div>
+          <ul class="field-hint-list">
+            <li>Sales &amp; Marketing voters: market potential.</li>
+            <li>Technical voters: technical probability of success.</li>
+          </ul>
+        </div>
 
-      <div class="form-group">
-        <label>Reasoning for the score*</label>
-        <textarea formControlName="scoreReason" rows="3"
-          style="border-bottom: 2px solid #007acc; border-radius: 6px 6px 0 0;"></textarea>
-      </div>
+        <div class="form-group">
+          <label>
+            Reasoning for the score
+            <span class="editable-hint">Required</span>
+          </label>
+          <textarea formControlName="scoreReason" rows="4" placeholder="Briefly explain the rationale behind your score…"></textarea>
+        </div>
+      </ng-container>
 
       <div class="button-container">
         <button type="submit" [disabled]="votingForm.invalid || !hasSelectedProject || isSubmitting">
-          {{ isSubmitting ? 'Submitting…' : 'Submit' }}
+          {{ isSubmitting ? 'Submitting…' : 'Submit vote' }}
         </button>
       </div>
     </form>

@@ -1,69 +1,82 @@
 <button class="back-btn" (click)="goBack()">Back to Home</button>
-<div class="main">
-    <div class="form-container">
+<div class="form-page">
+  <div class="form-container">
+    <h2 class="page-title">Update visibility &amp; status</h2>
+    <p class="page-lead">Search for a project, then set its status and visibility.</p>
 
-        <form [formGroup]="projectStatusForm" (ngSubmit)="onSubmit()" class="visibility-form">
-            <h2 class="form-title">Update visibility &amp; status</h2>
-            <p class="form-lead">Search for a project, then set its status and visibility.</p>
+    <form [formGroup]="projectStatusForm" (ngSubmit)="onSubmit()" class="visibility-form">
 
-            <div class="form-group">
-                <label>Project</label>
-                <app-project-search-autocomplete
-                    formControlName="projectLookup"
-                    [searchButtonBusy]="isSearching"
-                    (projectResolved)="onProjectSearchResolved($event)"
-                    (searchActivate)="onSearchFromLookup()"
-                />
-            </div>
+      <div class="form-group">
+        <label>Project</label>
+        <app-project-search-autocomplete
+          formControlName="projectLookup"
+          [searchButtonBusy]="isSearching"
+          (projectResolved)="onProjectSearchResolved($event)"
+          (searchActivate)="onSearchFromLookup()"
+        />
+      </div>
 
-            <div class="form-group">
-                <label>Project code</label>
-                <input type="text" formControlName="projectCode" readonly class="readonly-dim" />
-            </div>
-            <div class="form-group">
-                <label>Project name</label>
-                <input type="text" formControlName="projectName" readonly class="readonly-dim" />
-            </div>
+      <div *ngIf="currentProjectId">
+        <div class="form-group">
+          <label>Project code</label>
+          <input type="text" formControlName="projectCode" readonly class="readonly-dim" />
+        </div>
+        <div class="form-group">
+          <label>Project name</label>
+          <input type="text" formControlName="projectName" readonly class="readonly-dim" />
+        </div>
 
-            <div class="form-group">
-                <label>Project status*</label>
-                <select formControlName="projectStatus">
-                    <option value="">Select status</option>
-                    <option *ngFor="let status of projectStatuses" [value]="status">{{ status }}</option>
-                </select>
-            </div>
+        <div class="form-group">
+          <label>
+            Project status
+            <span class="editable-hint">Editable</span>
+          </label>
+          <select formControlName="projectStatus">
+            <option value="">Select status</option>
+            <option *ngFor="let status of projectStatuses" [value]="status">{{ status }}</option>
+          </select>
+        </div>
 
-            <div class="form-group visibility-field">
-                <label>Project Visibility*</label>
-                <div class="visibility-pick" role="radiogroup" aria-label="Project visibility">
-                    <button
-                        type="button"
-                        class="visibility-pick__card"
-                        [class.visibility-pick__card--selected]="projectStatusForm.get('projectVisibility')?.value === 'Active'"
-                        (click)="setProjectVisibility('Active')"
-                    >
-                        <span class="visibility-pick__mark" *ngIf="projectStatusForm.get('projectVisibility')?.value === 'Active'"></span>
-                        <span class="visibility-pick__title">Active</span>
-                        <span class="visibility-pick__sub">Eligible projects and voting</span>
-                    </button>
-                    <button
-                        type="button"
-                        class="visibility-pick__card"
-                        [class.visibility-pick__card--selected]="projectStatusForm.get('projectVisibility')?.value === 'Inactive'"
-                        (click)="setProjectVisibility('Inactive')"
-                    >
-                        <span class="visibility-pick__mark" *ngIf="projectStatusForm.get('projectVisibility')?.value === 'Inactive'"></span>
-                        <span class="visibility-pick__title">Inactive</span>
-                        <span class="visibility-pick__sub">Hidden from active flows</span>
-                    </button>
-                </div>
-            </div>
+        <div class="form-group visibility-field">
+          <label>
+            Project visibility
+            <span class="editable-hint">Editable</span>
+          </label>
+          <div class="visibility-pick" role="radiogroup" aria-label="Project visibility">
+            <button
+              type="button"
+              class="visibility-pick__card"
+              [class.visibility-pick__card--selected]="projectStatusForm.get('projectVisibility')?.value === 'Active'"
+              [attr.aria-checked]="projectStatusForm.get('projectVisibility')?.value === 'Active'"
+              role="radio"
+              (click)="setProjectVisibility('Active')"
+            >
+              <span class="visibility-pick__mark" *ngIf="projectStatusForm.get('projectVisibility')?.value === 'Active'"></span>
+              <span class="visibility-pick__title">Active</span>
+              <span class="visibility-pick__sub">Eligible for voting and visible in active flows</span>
+            </button>
+            <button
+              type="button"
+              class="visibility-pick__card"
+              [class.visibility-pick__card--selected]="projectStatusForm.get('projectVisibility')?.value === 'Inactive'"
+              [attr.aria-checked]="projectStatusForm.get('projectVisibility')?.value === 'Inactive'"
+              role="radio"
+              (click)="setProjectVisibility('Inactive')"
+            >
+              <span class="visibility-pick__mark" *ngIf="projectStatusForm.get('projectVisibility')?.value === 'Inactive'"></span>
+              <span class="visibility-pick__title">Inactive</span>
+              <span class="visibility-pick__sub">Hidden from active flows</span>
+            </button>
+          </div>
+          <p class="field-hint">Status and visibility are linked: <strong>In Progress</strong> defaults to Active, other statuses default to Inactive. You can still change it manually.</p>
+        </div>
+      </div>
 
-            <div class="button-container">
-                <button type="submit" [disabled]="projectStatusForm.invalid || isSubmitting || !currentProjectId">
-                    {{ isSubmitting ? 'Saving…' : 'Submit' }}
-                </button>
-            </div>
-        </form>
-    </div>
+      <div class="button-container">
+        <button type="submit" [disabled]="projectStatusForm.invalid || isSubmitting || !currentProjectId">
+          {{ isSubmitting ? 'Saving…' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

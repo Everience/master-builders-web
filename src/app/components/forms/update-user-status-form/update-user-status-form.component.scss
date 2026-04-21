@@ -137,9 +137,78 @@ $danger-bg: #fdecea;
 .search-form .search-wrapper {
   display: flex;
   gap: 8px;
+  align-items: stretch;
 
-  input {
+  .email-autocomplete {
     flex: 1;
+    min-width: 0;
+    position: relative;
+
+    input {
+      width: 100%;
+    }
+  }
+}
+
+.email-suggestions-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 48, 135, 0.12);
+  max-height: 280px;
+  overflow: auto;
+}
+
+.email-suggestions-loading {
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  color: $muted;
+}
+
+.email-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.email-suggestion {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 14px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover,
+  &--active {
+    background: $navy-light;
+    border-left-color: $accent;
+  }
+
+  &__email {
+    font-weight: 600;
+    color: $navy;
+    font-size: 0.88rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__name {
+    font-size: 0.74rem;
+    color: $muted;
+    letter-spacing: 0.01em;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

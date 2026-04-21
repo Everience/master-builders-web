@@ -1,21 +1,3 @@
-.main {
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 32px;
-
-  .form-container {
-    @media screen and (max-width: 900px) {
-      width: 100%;
-    }
-
-    @media screen and (min-width: 901px) {
-      width: 60%;
-      max-width: 720px;
-    }
-  }
-}
-
 .visibility-form {
   display: flex;
   flex-direction: column;
@@ -23,69 +5,12 @@
   margin: 0 auto;
 }
 
-.form-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--navy, #003087);
-  letter-spacing: 0.02em;
-  margin-bottom: 8px;
-}
-
-.form-lead {
-  font-size: 0.9rem;
-  color: var(--muted, #6b7a99);
-  line-height: 1.55;
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border, #dce3ef);
-}
-
-.visibility-form .form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1.25rem;
-
-  label {
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 0.45rem;
-    color: #007acc;
-  }
-
-  input,
-  select,
-  textarea {
-    padding: 0.7rem 0.85rem;
-    border: none;
-    background-color: #eeeeee;
-    border-radius: 8px;
-    font-size: 14px;
-  }
-
-  select {
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
-
-    &:focus {
-      outline: none;
-      border-color: #007acc;
-      box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.2);
-    }
-  }
-}
-
-.readonly-dim {
-  cursor: default;
-  color: var(--muted, #6b7a99);
-  background-color: #f0f0f0;
-}
-
 .visibility-field {
   margin-bottom: 1.5rem;
+
+  .field-hint {
+    margin-top: 10px;
+  }
 }
 
 .visibility-pick {
@@ -161,41 +86,5 @@
     line-height: 1.45;
     color: var(--muted, #6b7a99);
     max-width: 100%;
-  }
-}
-
-.visibility-form .button-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  button[type='submit'] {
-    margin-top: 28px;
-    margin-bottom: 28px;
-    min-width: 280px;
-    padding: 0.7rem 1.25rem;
-    font-size: 1rem;
-    font-weight: 600;
-    font-family: 'Barlow', sans-serif;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    background: #007acc;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 14px rgba(0, 122, 204, 0.25);
-
-    &:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    &:hover:not(:disabled) {
-      background: #004a96;
-      transform: translateY(-1px);
-    }
   }
 }

@@ -1,70 +1,75 @@
-<!--CREATE PROJECT FORM-->
 <button class="back-btn" (click)="goBack()">Back to Home</button>
-<div class="main">
+<div class="form-page">
   <div class="form-container">
-    <h2>Create New Project</h2><br>
+    <h2 class="page-title">Create new project</h2>
+    <p class="page-lead">Fill in the project details. Attachments are optional and can be added later.</p>
 
     <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+
+      <div class="section-heading">Identity</div>
       <div class="form-group">
-        <label>Project Code</label>
-        <input type="text" formControlName="projectCode" />
+        <label>Project code</label>
+        <input type="text" formControlName="projectCode" placeholder="e.g. ABC01" />
+      </div>
+      <div class="form-group">
+        <label>Project name</label>
+        <input type="text" formControlName="projectName" placeholder="Short descriptive name" />
+      </div>
+
+      <div class="section-heading">Classification</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Region</label>
+          <select formControlName="region">
+            <option value="">Select region</option>
+            <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Market segment</label>
+          <select formControlName="marketSegment">
+            <option value="">Select segment</option>
+            <option *ngFor="let segment of marketSegments" [value]="segment">{{ segment }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Innovation area</label>
+          <select formControlName="innovationArea">
+            <option value="">Select area</option>
+            <option *ngFor="let area of innovationAreas" [value]="area">{{ area }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Project phase</label>
+          <select formControlName="projectPhase">
+            <option value="">Select phase</option>
+            <option *ngFor="let phase of projectPhases" [value]="phase">{{ phase }}</option>
+          </select>
+        </div>
       </div>
 
       <div class="form-group">
-        <label>Project Name</label>
-        <input type="text" formControlName="projectName" />
-      </div>
-
-      <div class="form-group">
-        <label>Region</label>
-        <select formControlName="region">
-          <option value="">Select region</option>
-          <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Market Segment</label>
-        <select formControlName="marketSegment">
-          <option value="">Select segment</option>
-          <option *ngFor="let segment of marketSegments" [value]="segment">{{ segment }}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Innovation Area</label>
-        <select formControlName="innovationArea">
-          <option value="">Select area</option>
-          <option *ngFor="let area of innovationAreas" [value]="area">{{ area }}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Project Phase</label>
-        <select formControlName="projectPhase">
-          <option value="">Select phase</option>
-          <option *ngFor="let phase of projectPhases" [value]="phase">{{ phase }}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Project Status</label>
+        <label>Project status</label>
         <select formControlName="projectStatus">
           <option value="">Select status</option>
           <option *ngFor="let status of projectStatuses" [value]="status">{{ status }}</option>
         </select>
       </div>
 
+      <div class="section-heading">Details</div>
       <div class="form-group">
         <label>Notes</label>
-        <textarea formControlName="notes" rows="3"></textarea>
+        <textarea formControlName="notes" rows="3" placeholder="Context, goals, links…"></textarea>
       </div>
 
+      <div class="section-heading">Attachments</div>
       <div class="form-group">
         <label>
-          Attachments
-          <span class="attachments-hint">Max 10 files, up to 10MB each — PDF, Word, Excel, images</span>
+          Files
+          <span class="field-badge field-badge--muted">Optional</span>
         </label>
+        <p class="field-hint">Up to {{ MAX_FILES }} files, {{ MAX_SIZE_MB }} MB each — PDF, Word, Excel, images.</p>
+
         <input
           type="file"
           id="fileInput"
@@ -73,11 +78,13 @@
           (change)="onFileSelected($event)"
           class="file-input-hidden"
         />
-        <button type="button" class="file-chip file-chip--action" (click)="triggerFileInput()">
+        <button type="button" class="file-chip" (click)="triggerFileInput()">
           <img src="../../../../assets/icons/folder (2).png" alt="" class="file-chip__img" />
           <span>Choose files</span>
         </button>
+
         <p class="attachments-empty" *ngIf="uploadedFiles.length === 0">No files selected yet.</p>
+
         <ul class="file-list" *ngIf="uploadedFiles.length">
           <li *ngFor="let file of uploadedFiles; let i = index">
             <span class="file-list__main">
@@ -91,7 +98,9 @@
       </div>
 
       <div class="button-container">
-        <button type="submit" [disabled]="projectForm.invalid">Submit</button>
+        <button type="submit" [disabled]="projectForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Creating…' : 'Create project' }}
+        </button>
       </div>
     </form>
   </div>

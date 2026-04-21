@@ -1,115 +1,138 @@
 <button class="back-btn" (click)="goBack()">Back to Home</button>
-<div class="main">
-    <div class="form-container">
+<div class="form-page">
+  <div class="form-container">
+    <h2 class="page-title">Update project</h2>
+    <p class="page-lead">Search for a project, then edit the fields you want to update. Read-only fields are locked once the project is loaded.</p>
 
-        <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
-            <h2>Update Project</h2><br>
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
 
-            <div class="form-group">
-                <label>Project</label>
-                <app-project-search-autocomplete
-                    formControlName="projectLookup"
-                    [searchButtonBusy]="isSearching"
-                    (projectResolved)="onProjectSearchResolved($event)"
-                    (searchActivate)="onSearchFromLookup()"
-                />
-            </div>
+      <div class="form-group">
+        <label>Project</label>
+        <app-project-search-autocomplete
+          formControlName="projectLookup"
+          [searchButtonBusy]="isSearching"
+          (projectResolved)="onProjectSearchResolved($event)"
+          (searchActivate)="onSearchFromLookup()"
+        />
+      </div>
 
-            <div class="form-group">
-                <label>Project code</label>
-                <input type="text" formControlName="projectCode" readonly class="readonly-dim" />
-            </div>
-            <div class="form-group">
-                <label>Project name</label>
-                <input type="text" formControlName="projectName" readonly class="readonly-dim" />
-            </div>
+      <div *ngIf="currentProjectId">
+        <div class="section-heading">Identity</div>
+        <div class="form-group">
+          <label>Project code</label>
+          <input type="text" formControlName="projectCode" readonly class="readonly-dim" />
+        </div>
+        <div class="form-group">
+          <label>Project name</label>
+          <input type="text" formControlName="projectName" readonly class="readonly-dim" />
+        </div>
 
-            <div class="form-group">
-                <label>Project Status</label>
-                <select formControlName="projectStatus">
-                    <option value="">Select status</option>
-                    <option *ngFor="let status of projectStatuses" [value]="status">{{ status }}</option>
-                </select>
-            </div>
+        <div class="section-heading">Classification</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>
+              Project status
+            </label>
+            <select formControlName="projectStatus">
+              <option value="">Select status</option>
+              <option *ngFor="let status of projectStatuses" [value]="status">{{ status }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>
+              Innovation area
+            </label>
+            <select formControlName="innovationArea">
+              <option value="">Select area</option>
+              <option *ngFor="let area of innovationAreas" [value]="area">{{ area }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>
+              Region
+            </label>
+            <select formControlName="region">
+              <option value="">Select region</option>
+              <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>
+              Market segment
+            </label>
+            <select formControlName="marketSegment">
+              <option value="">Select segment</option>
+              <option *ngFor="let segment of marketSegments" [value]="segment">{{ segment }}</option>
+            </select>
+          </div>
+        </div>
 
-            <div class="form-group">
-                <label>Innovation Area</label>
-                <select formControlName="innovationArea">
-                    <option value="">Select area</option>
-                    <option *ngFor="let area of innovationAreas" [value]="area">{{ area }}</option>
-                </select>
-            </div>
+        <div class="section-heading">New phase &amp; update notes</div>
+        <div class="form-group">
+          <label>
+            New project phase
+            <span class="editable-hint">Editable</span>
+          </label>
+          <select formControlName="projectPhase">
+            <option value="">Select phase</option>
+            <option *ngFor="let phase of projectPhases" [value]="phase">{{ phase }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>
+            Update notes
+            <span class="editable-hint">Required</span>
+          </label>
+          <textarea formControlName="notes" rows="3" placeholder="What changed and why…"></textarea>
+        </div>
 
-            <div class="form-group">
-                <label>Region</label>
-                <select formControlName="region">
-                    <option value="">Select region</option>
-                    <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
-                </select>
-            </div>
+        <div class="section-heading">Attachments</div>
+        <div class="form-group" *ngIf="attachmentsLink">
+          <label>Existing files</label>
+          <a [href]="attachmentsLink" target="_blank" class="file-chip">
+            <img src="../../../../assets/icons/folder (2).png" alt="" class="file-chip__img" />
+            <span class="file-chip__name">View project files on SharePoint</span>
+          </a>
+        </div>
 
-            <div class="form-group">
-                <label>Market Segment</label>
-                <select formControlName="marketSegment">
-                    <option value="">Select segment</option>
-                    <option *ngFor="let segment of marketSegments" [value]="segment">{{ segment }}</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Update Notes* <span class="editable-hint">editable</span></label>
-                <textarea formControlName="notes" rows="3"></textarea>
-            </div>
+        <div class="form-group">
+          <label>
+            Add new files
+            <span class="field-badge field-badge--muted">Optional</span>
+          </label>
+          <p class="field-hint">Up to {{ MAX_FILES }} files, {{ MAX_SIZE_MB }} MB each.</p>
 
-            <div class="form-group">
-                <label>New Project Phase* <span class="editable-hint">editable</span></label>
-                <select formControlName="projectPhase">
-                    <option value="">Select phase</option>
-                    <option *ngFor="let phase of projectPhases" [value]="phase">{{ phase }}</option>
-                </select>
-            </div>
-            <!-- existing files — shown after search, once BE adds files to getProjectByCode -->
-            <div class="form-group" *ngIf="currentProjectId && attachmentsLink">
-                <label>Existing Files</label>
-                <a [href]="attachmentsLink" target="_blank" class="file-chip">
-                    <img src="../../../../assets/icons/folder (2).png" alt="folder-icon" style="width: 15px;">
-                    <span class="file-chip__name">View project files on SharePoint</span>
-                </a>
-            </div>
-            
-            <!-- new files — optional -->
-            <div class="form-group">
-                <label>
-                    Add New Files <span class="editable-hint">editable · optional</span>
-                    <br>
-                    <span style="font-size: 0.75rem;">Max 10 files, up to 10MB each</span>
-                </label>
-            
-                <input type="file" id="updateFileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx"
-                    (change)="onFileSelected($event)" style="display: none;" />
-            
-                <button type="button" class="file-chip" (click)="triggerFileInput()">
-                    <img src="../../../../assets/icons/folder (2).png" alt="folder-icon" style="width: 15px;">
-                    Choose Files
-                </button>
-            
-                <ul class="file-list" *ngIf="newFiles.length">
-                    <li *ngFor="let file of newFiles; let i = index">
-                        <span class="file-list__main">
-                            <span class="file-list__icon">{{ getFileIcon(file.name) }}</span>
-                            <span class="file-list__name">{{ file.name }}</span>
-                            <span class="file-list__size">({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span>
-                        </span>
-                        <button type="button" class="file-list__remove" (click)="removeNewFile(i)">Remove</button>
-                    </li>
-                </ul>
-            </div>
+          <input
+            type="file"
+            id="updateFileInput"
+            multiple
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx"
+            (change)="onFileSelected($event)"
+            class="file-input-hidden"
+          />
+          <button type="button" class="file-chip" (click)="triggerFileInput()">
+            <img src="../../../../assets/icons/folder (2).png" alt="" class="file-chip__img" />
+            <span>Choose files</span>
+          </button>
 
-            <div class="button-container">
-                <button type="submit" [disabled]="projectForm.invalid || isSubmitting || !currentProjectId">
-                    {{ isSubmitting ? 'Saving...' : 'Submit' }}
-                </button>
-            </div>
-        </form>
-    </div>
+          <ul class="file-list" *ngIf="newFiles.length">
+            <li *ngFor="let file of newFiles; let i = index">
+              <span class="file-list__main">
+                <span class="file-list__icon">{{ getFileIcon(file.name) }}</span>
+                <span class="file-list__name">{{ file.name }}</span>
+                <span class="file-list__size">({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span>
+              </span>
+              <button type="button" class="file-list__remove" (click)="removeNewFile(i)">Remove</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="button-container">
+        <button type="submit" [disabled]="projectForm.invalid || isSubmitting || !currentProjectId">
+          {{ isSubmitting ? 'Saving…' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

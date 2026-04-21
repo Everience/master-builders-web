@@ -24,6 +24,11 @@ interface DeptCell {
   record: UserRecord | null;
 }
 
+interface EmailSuggestion {
+  email: string;
+  user_name: string;
+}
+
 @Component({
   selector: 'app-update-user-status-form',
   standalone: true,
@@ -36,6 +41,7 @@ export class UpdateUserStatusFormComponent implements OnInit {
 
   readonly departments = ['Board', 'Marketing', 'Technical Managers', 'R&D'];
   readonly roles = ['Admin', 'User'];
+  readonly emailMaxSuggestions = 10;
 
   searchForm!: FormGroup;
   createForm!: FormGroup;
@@ -47,6 +53,16 @@ export class UpdateUserStatusFormComponent implements OnInit {
 
   busyDept: string | null = null;
   isCreating = false;
+
+  private allUsers: UserRecord[] = [];
+  private emailCatalog: EmailSuggestion[] = [];
+  catalogLoading = false;
+  catalogReady = false;
+
+  emailSuggestions: EmailSuggestion[] = [];
+  showEmailSuggestions = false;
+  emailActiveIndex = -1;
+  private emailBlurTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -66,6 +82,8 @@ export class UpdateUserStatusFormComponent implements OnInit {
       department: ['', Validators.required],
       role: ['User', Validators.required],
     });
+
+    this.loadCatalog();
   }
 
   setMode(m: Mode): void {
@@ -135,6 +153,123 @@ export class UpdateUserStatusFormComponent implements OnInit {
   }
 
   trackByDept = (_i: number, c: DeptCell): string => c.department;
+  trackByEmail = (_i: number, s: EmailSuggestion): string => s.email.toLowerCase();
+
+  private loadCatalog(): void {
+    if (this.catalogLoading) return;
+    this.catalogLoading = true;
+    this.userService.getAllUsers().subscribe({
+      next: (res) => {
+        this.allUsers = res?.users || [];
+        this.rebuildEmailCatalog();
+        this.catalogReady = true;
+        this.catalogLoading = false;
+        if (this.showEmailSuggestions) this.refreshEmailSuggestions();
+      },
+      error: () => {
+        this.catalogLoading = false;
+      },
+    });
+  }
+
+  private rebuildEmailCatalog(): void {
+    const map = new Map<string, EmailSuggestion>();
+    for (const u of this.allUsers) {
+      const email = String(u.email || '').trim();
+      if (!email) continue;
+      const k = email.toLowerCase();
+      const prev = map.get(k);
+      const name = String(u.user_name || '').trim();
+      if (!prev || (!prev.user_name && name)) {
+        map.set(k, { email, user_name: name });
+      }
+    }
+    this.emailCatalog = Array.from(map.values()).sort((a, b) =>
+      a.email.toLowerCase().localeCompare(b.email.toLowerCase())
+    );
+  }
+
+  refreshEmailSuggestions(): void {
+    const raw = String(this.searchForm?.value?.email ?? '').trim();
+    const q = raw.toLowerCase();
+    if (!q) {
+      this.emailSuggestions = [];
+      this.emailActiveIndex = -1;
+      return;
+    }
+    const starts: EmailSuggestion[] = [];
+    const contains: EmailSuggestion[] = [];
+    for (const e of this.emailCatalog) {
+      const el = e.email.toLowerCase();
+      if (el.startsWith(q)) starts.push(e);
+      else if (el.includes(q) || e.user_name.toLowerCase().includes(q)) contains.push(e);
+    }
+    this.emailSuggestions = [...starts, ...contains].slice(0, this.emailMaxSuggestions);
+    if (this.emailActiveIndex >= this.emailSuggestions.length) {
+      this.emailActiveIndex = this.emailSuggestions.length ? this.emailSuggestions.length - 1 : -1;
+    }
+  }
+
+  private clearEmailBlurTimer(): void {
+    if (this.emailBlurTimer != null) {
+      clearTimeout(this.emailBlurTimer);
+      this.emailBlurTimer = null;
+    }
+  }
+
+  onEmailFocus(): void {
+    this.clearEmailBlurTimer();
+    if (!this.catalogReady && !this.catalogLoading) this.loadCatalog();
+    this.showEmailSuggestions = true;
+    this.refreshEmailSuggestions();
+  }
+
+  onEmailBlur(): void {
+    this.clearEmailBlurTimer();
+    this.emailBlurTimer = setTimeout(() => {
+      this.showEmailSuggestions = false;
+      this.emailActiveIndex = -1;
+      this.emailBlurTimer = null;
+    }, 180);
+  }
+
+  onEmailKeydown(ev: KeyboardEvent): void {
+    const panelOpen = this.showEmailSuggestions && this.emailSuggestions.length > 0;
+
+    if (ev.key === 'ArrowDown' && panelOpen) {
+      ev.preventDefault();
+      this.emailActiveIndex = Math.min(this.emailActiveIndex + 1, this.emailSuggestions.length - 1);
+      return;
+    }
+    if (ev.key === 'ArrowUp' && panelOpen) {
+      ev.preventDefault();
+      this.emailActiveIndex = Math.max(this.emailActiveIndex - 1, -1);
+      return;
+    }
+    if (ev.key === 'Escape' && this.showEmailSuggestions) {
+      ev.preventDefault();
+      this.showEmailSuggestions = false;
+      this.emailActiveIndex = -1;
+      return;
+    }
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      if (panelOpen && this.emailActiveIndex >= 0) {
+        this.selectEmail(this.emailSuggestions[this.emailActiveIndex]);
+        return;
+      }
+      this.searchUsers();
+    }
+  }
+
+  selectEmail(item: EmailSuggestion, ev?: MouseEvent): void {
+    if (ev) ev.preventDefault();
+    this.clearEmailBlurTimer();
+    this.searchForm.patchValue({ email: item.email }, { emitEvent: false });
+    this.showEmailSuggestions = false;
+    this.emailActiveIndex = -1;
+    this.searchUsers();
+  }
 
   searchUsers(): void {
     if (this.searchForm.invalid) {
@@ -144,13 +279,16 @@ export class UpdateUserStatusFormComponent implements OnInit {
     const email = (this.searchForm.value.email || '').trim().toLowerCase();
     if (!email) return;
 
+    this.showEmailSuggestions = false;
     this.isSearching = true;
     this.hasSearched = false;
 
     this.userService.getAllUsers().subscribe({
       next: (res) => {
-        const all: UserRecord[] = res?.users || [];
-        this.records = all.filter((u: any) => (u.email || '').toLowerCase() === email);
+        this.allUsers = res?.users || [];
+        this.rebuildEmailCatalog();
+        this.catalogReady = true;
+        this.records = this.allUsers.filter((u: any) => (u.email || '').toLowerCase() === email);
         this.searchedEmail = email;
         this.hasSearched = true;
         this.isSearching = false;
@@ -171,6 +309,9 @@ export class UpdateUserStatusFormComponent implements OnInit {
       this.hasSearched = false;
       this.records = [];
     }
+    this.showEmailSuggestions = true;
+    this.emailActiveIndex = -1;
+    this.refreshEmailSuggestions();
   }
 
   refreshRecords(onDone?: () => void): void {
@@ -181,8 +322,9 @@ export class UpdateUserStatusFormComponent implements OnInit {
     }
     this.userService.getAllUsers().subscribe({
       next: (res) => {
-        const all: UserRecord[] = res?.users || [];
-        this.records = all.filter((u: any) => (u.email || '').toLowerCase() === email);
+        this.allUsers = res?.users || [];
+        this.rebuildEmailCatalog();
+        this.records = this.allUsers.filter((u: any) => (u.email || '').toLowerCase() === email);
         onDone?.();
       },
       error: (err: any) => {

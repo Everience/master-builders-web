@@ -5,6 +5,8 @@
   --navy: #003087;
   --navy-dark: #00215e;
   --navy-light: #e8eef7;
+  --accent: #007acc;
+  --accent-dark: #004a96;
   --amber: #F5A623;
   --amber-dark: #d4891a;
   --white: #ffffff;
@@ -13,9 +15,18 @@
   --muted: #6b7a99;
   --border: #dce3ef;
   --card-bg: #ffffff;
+  --success: #1a6b3c;
+  --success-bg: #e6f4ee;
+  --danger: #8b2020;
+  --danger-bg: #fdecea;
+  --warn: #8a5a00;
+  --warn-bg: #fff4e0;
   --shadow-sm: 0 2px 8px rgba(0, 48, 135, 0.08);
   --shadow-md: 0 8px 24px rgba(0, 48, 135, 0.12);
   --shadow-lg: 0 16px 48px rgba(0, 48, 135, 0.16);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 }
 
 * {
@@ -39,20 +50,24 @@ h3 {
   letter-spacing: 0.02em;
 }
 
+
+/* =========================================================
+   BACK BUTTON (global, used on every form page)
+   ========================================================= */
 .back-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   border: none;
   color: #fff;
-  background-color: #003087;
+  background-color: var(--navy);
   padding: 8px 16px;
   font-family: 'Barlow', sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease;
 
@@ -64,7 +79,7 @@ h3 {
   }
 
   &:hover {
-    background-color: #00215e;
+    background-color: var(--navy-dark);
     transform: translateX(-2px);
     margin-bottom: 2px;
 
@@ -75,5 +90,364 @@ h3 {
 
   &:active {
     transform: translateX(0);
+  }
+}
+
+
+/* =========================================================
+   PAGE HEADINGS (used inside forms as intro)
+   ========================================================= */
+.page-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.02em;
+  margin: 0 0 6px;
+}
+
+.page-lead {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0 0 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Small section heading inside a form (Project / Classification / Your vote…) */
+.section-heading {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 18px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+
+/* =========================================================
+   FORM LAYOUT
+   ========================================================= */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.1rem;
+
+  label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.45rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 0.7rem 0.85rem;
+    border: 1px solid transparent;
+    background-color: #eeeeee;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-family: 'Barlow', sans-serif;
+    color: var(--text);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+
+    &::placeholder {
+      color: #9aa4b8;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.2);
+      background-color: #fff;
+    }
+  }
+
+  select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='none' stroke='%236b7a99' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5l5 5 5-5'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  textarea {
+    min-height: 88px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 6px 0 0;
+    line-height: 1.45;
+  }
+
+  .field-hint-list {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.55;
+
+    li { margin-bottom: 2px; }
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Read-only, visually dimmed field */
+.readonly-dim {
+  cursor: not-allowed !important;
+  color: var(--muted) !important;
+  background-color: #f0f0f0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+
+  &:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+    background-color: #f0f0f0 !important;
+  }
+}
+
+
+/* =========================================================
+   INLINE BADGES & HINTS
+   ========================================================= */
+.field-badge,
+.editable-hint {
+  display: inline-block;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--navy);
+  background: var(--navy-light);
+  padding: 3px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.field-badge--muted {
+  color: var(--muted);
+  background: #eef1f8;
+}
+
+.inline-note {
+  margin: -4px 0 10px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+
+  strong { color: var(--navy); }
+}
+
+
+/* =========================================================
+   PRIMARY SUBMIT BUTTON + CONTAINER
+   ========================================================= */
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+
+  button[type='submit'],
+  .primary-btn {
+    margin-top: 22px;
+    margin-bottom: 20px;
+    min-width: 280px;
+    padding: 0.75rem 1.25rem;
+    font-family: 'Barlow', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px rgba(0, 122, 204, 0.25);
+
+    &:hover:not(:disabled) {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+  }
+}
+
+
+/* =========================================================
+   FILE CHIP (choose-files button / sharepoint link)
+   ========================================================= */
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--navy-light);
+  border: 1px solid #c0cde0;
+  border-radius: var(--radius-md);
+  color: var(--navy);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'Barlow', sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 4px;
+  width: fit-content;
+
+  &:hover {
+    background: #d0ddf0;
+    border-color: #a8b8d4;
+    box-shadow: var(--shadow-sm);
+  }
+
+  &__img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.attachments-empty {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+
+/* =========================================================
+   FILE LIST (uploaded files)
+   ========================================================= */
+.file-list {
+  margin-top: 10px;
+  list-style: none;
+  padding: 0;
+
+  > li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  &__main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__icon { flex-shrink: 0; }
+
+  &__name {
+    font-weight: 600;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  &__size {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  &__remove {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    color: #c0392b;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.15s ease;
+
+    &:hover { background: rgba(192, 57, 43, 0.08); }
+  }
+}
+
+
+/* =========================================================
+   SHARED PAGE WRAPPER FOR FORMS
+   ========================================================= */
+.form-page {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 25px;
+
+  .form-container {
+    width: 100%;
+
+    @media screen and (min-width: 901px) {
+      width: 60%;
+      max-width: 760px;
+    }
   }
 }
