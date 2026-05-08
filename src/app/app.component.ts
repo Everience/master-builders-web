@@ -4,6 +4,7 @@ import { HomeComponent } from './sections/home/home.component';
 import { MsalService } from '@azure/msal-angular';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ToastComponent } from './components/shared/toast/toast.component';
+import { msalPostLogoutRedirectUri } from './msal-redirect';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +33,7 @@ export class AppComponent {
 
   logout() {
     this.msalService.logoutRedirect({
-      postLogoutRedirectUri: 'http://localhost:4200/login'
+      postLogoutRedirectUri: msalPostLogoutRedirectUri(),
     });
   }
 }

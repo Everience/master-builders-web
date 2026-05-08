@@ -16,13 +16,14 @@ import {
   MSAL_GUARD_CONFIG,
 } from '@azure/msal-angular';
 import { environment } from '../environments/environments';
+import { msalRedirectUri } from './msal-redirect';
 
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
     auth: {
       clientId:    environment.msal.clientId,
       authority:   `https://login.microsoftonline.com/${environment.msal.tenantId}`,
-      redirectUri: environment.msal.redirectUri,
+      redirectUri: msalRedirectUri(),
     },
     cache: {
       cacheLocation: 'localStorage',
