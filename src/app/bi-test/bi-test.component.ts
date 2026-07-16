@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../services/project/auth.service';
 import { MsalService } from '@azure/msal-angular';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-bi-test',
@@ -14,7 +15,7 @@ isAdmin = false;
   userName = '';
   acc: any;
 
-  constructor(private authService: AuthService, private msalService: MsalService) {}
+  constructor(private authService: AuthService, private msalService: MsalService, private router: Router) {}
 
   ngOnInit() {
     this.authService.isAdmin().subscribe(result => {
@@ -23,5 +24,9 @@ isAdmin = false;
     this.userName = this.authService.getUserName();
     this.acc = this.authService.getAccount();
     console.log(this.msalService.instance.getActiveAccount()?.idTokenClaims, this.acc);
+  }
+
+  goBack() {
+    this.router.navigate(['/home']);
   }
 }
