@@ -23,6 +23,6 @@ export class HomeComponent implements OnInit {
     });
     this.userName = this.authService.getUserName();
     this.acc = this.authService.getAccount();
-    console.log(this.msalService.instance.getActiveAccount()?.idTokenClaims, this.acc);
+    console.log(this.msalService.instance.getActiveAccount()?.idTokenClaims, this.acc.name, this.acc);
   }
 }

@@ -5,6 +5,7 @@ import { MsalService } from '@azure/msal-angular';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ToastComponent } from './components/shared/toast/toast.component';
 import { msalPostLogoutRedirectUri } from './msal-redirect';
+import { AuthService } from './services/project/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,7 @@ export class AppComponent {
   title = 'mb';
   msalInitialized = false;
 
-  constructor(private router: Router, private msalService: MsalService, @Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(private router: Router, private msalService: MsalService, @Inject(PLATFORM_ID) private platformId: Object, private authService: AuthService,) {}
     
   get isDashboard() {
     return this.router.url.includes('home');
@@ -30,6 +31,10 @@ export class AppComponent {
       this.msalInitialized = true;
     });
   }
+
+  get account() {
+  return this.authService.getAccount();
+}
 
   logout() {
     this.msalService.logoutRedirect({
