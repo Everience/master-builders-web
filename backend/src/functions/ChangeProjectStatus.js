@@ -37,7 +37,7 @@ app.http("ChangeProjectStatus", {
         });
       }
 
-      if (!allowedStatus.includes(status)) {
+      if (!allowedStatus.includes(status.toLowerCase())) {
         return withCors({
           status: 400,
           body: JSON.stringify({
@@ -46,7 +46,7 @@ app.http("ChangeProjectStatus", {
         });
       }
 
-      if (!allowedVisibility.includes(project_visibility)) {
+      if (!allowedVisibility.includes(project_visibility.toLowerCase())) {
         return withCors({
           status: 400,
           body: JSON.stringify({

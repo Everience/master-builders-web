@@ -42,7 +42,8 @@ app.http("GetProjectByCode", {
             project_visibility,
             innovation_area,
             created_at 
-            FROM Projects WHERE project_code = @project_code`
+            FROM Projects WHERE project_code = @project_code
+            ORDER BY created_at DESC`
         );
 
       if (result.recordset.length === 0) {
