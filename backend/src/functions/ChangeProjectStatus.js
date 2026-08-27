@@ -19,7 +19,8 @@ app.http("ChangeProjectStatus", {
 
       const body = await request.json();
       const { project_id, status, project_visibility } = body;
-
+      status = status.toLowerCase();
+      project_visibility = project_visibility.toLowerCase();
       //validazioni
       if (!project_id) {
         return withCors({
