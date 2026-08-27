@@ -18,8 +18,9 @@ app.http("ChangeProjectStatus", {
       requireRole(user, "admin");
 
       const body = await request.json();
-      const { project_id, status, project_visibility } = body;
-
+      let { project_id, status, project_visibility } = body;
+      status = status.toLowerCase();
+      project_visibility = project_visibility.toLowerCase();
       //validazioni
       if (!project_id) {
         return withCors({
@@ -37,7 +38,7 @@ app.http("ChangeProjectStatus", {
         });
       }
 
-      if (!allowedStatus.includes(status)) {
+      if (!allowedStatus.includes(status.toLowerCase())) {
         return withCors({
           status: 400,
           body: JSON.stringify({
@@ -46,7 +47,7 @@ app.http("ChangeProjectStatus", {
         });
       }
 
-      if (!allowedVisibility.includes(project_visibility)) {
+      if (!allowedVisibility.includes(project_visibility.toLowerCase())) {
         return withCors({
           status: 400,
           body: JSON.stringify({

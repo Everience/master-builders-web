@@ -82,7 +82,7 @@ app.http("UpdateProject", {
           .query(`
             UPDATE Projects
             SET project_visibility = 'inactive',
-                project_status = 'Completed'
+                project_status = 'completed'
             WHERE project_id = @old_project_id
           `);
 
