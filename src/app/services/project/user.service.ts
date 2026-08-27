@@ -61,4 +61,20 @@ export class UserService {
       ))
     );
   }
+
+  createUser(payload: {
+    email: string;
+    user_name: string;
+    department: string;
+    role: string;
+    status: 'Active' | 'Inactive';
+  }): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.post(
+        `${this.baseUrl}/CreateUser`,
+        payload,
+        { headers, params: { code: this.key } }
+      ))
+    );
+  }
 }

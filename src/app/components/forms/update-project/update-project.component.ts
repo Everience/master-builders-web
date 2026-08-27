@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormGroup,
@@ -8,14 +9,16 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProjectService } from '../../../services/project/project.service';
-import { Subject } from 'rxjs';
 import { ToastService } from '../../../services/project/toast.service';
-
+import {
+  ProjectResolvedEvent,
+  ProjectSearchAutocompleteComponent,
+} from '../../shared/project-search-autocomplete/project-search-autocomplete.component';
 
 @Component({
   selector: 'app-update-project',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ProjectSearchAutocompleteComponent],
   templateUrl: './update-project.component.html',
   styleUrl: './update-project.component.scss'
 })
@@ -24,6 +27,12 @@ export class UpdateProjectComponent implements OnInit {
   isSearching = false;
   isSubmitting = false;
   projectForm!: FormGroup;
+
+  private loadedProjectCodeLower: string | null = null;
+  private loadedLookupSnapshotLower: string | null = null;
+  private pendingPickSearchMode: 'code' | 'name' | null = null;
+  private readonly destroyRef = inject(DestroyRef);
+
   regions = ['AMET', 'ANZ', 'EU', 'GLOBAL', 'BA', 'SA'];
   marketSegments = ['AS', 'CA', 'CS', 'FIBERS', 'UGC', 'VTG'];
   innovationAreas = [
@@ -51,6 +60,7 @@ export class UpdateProjectComponent implements OnInit {
   ngOnInit() {
   this.projectForm = this.fb.group({
     projectCode:     ['', Validators.required],
+    projectLookup:   [''],
     projectName:     ['', Validators.required],
     projectStatus:   ['', Validators.required],
     innovationArea:  ['', Validators.required],
@@ -60,7 +70,42 @@ export class UpdateProjectComponent implements OnInit {
     notes:           ['', Validators.required],
     attachmentsLink: [''],
   });
+  this.projectForm.get('projectLookup')!.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    const snap = this.loadedLookupSnapshotLower;
+    if (snap == null) return;
+    const q = this.projectForm.get('projectLookup')?.value?.trim().toLowerCase() ?? '';
+    if (this.currentProjectId && q !== snap) {
+      this.currentProjectId = null;
+      this.loadedProjectCodeLower = null;
+      this.loadedLookupSnapshotLower = null;
+      this.pendingPickSearchMode = null;
+      this.clearAutofilledFields();
+    }
+  });
 }
+
+  onProjectSearchResolved(ev: ProjectResolvedEvent): void {
+    const code = String(ev.row?.project_code ?? '').trim();
+    if (!code) return;
+    this.pendingPickSearchMode = ev.searchMode;
+    const lookup =
+      ev.searchMode === 'name'
+        ? String(ev.row.project_name ?? '').trim()
+        : code;
+    this.projectForm.patchValue(
+      { projectCode: code, projectLookup: lookup },
+      { emitEvent: false }
+    );
+    this.searchProject();
+  }
+
+  onSearchFromLookup(): void {
+    const raw = this.projectForm.get('projectLookup')?.value?.trim() ?? '';
+    if (!raw) return;
+    this.pendingPickSearchMode = null;
+    this.projectForm.patchValue({ projectCode: raw }, { emitEvent: false });
+    this.searchProject();
+  }
 
 searchProject() {
   const code = this.projectForm.get('projectCode')?.value?.trim();
@@ -72,10 +117,19 @@ searchProject() {
     next: (res) => {
       const p = res.project;
       this.currentProjectId = p.project_id;
+      this.loadedProjectCodeLower = code.toLowerCase();
+      const display =
+        this.pendingPickSearchMode === 'name'
+          ? String(p.project_name ?? '').trim()
+          : String(p.project_code ?? code).trim();
+      this.projectForm.patchValue({ projectLookup: display }, { emitEvent: false });
+      this.loadedLookupSnapshotLower = display.toLowerCase();
+      this.pendingPickSearchMode = null;
       this.existingFiles = res.files || []; 
       this.attachmentsLink = p.attachments_link || '';
 
       this.projectForm.patchValue({
+        projectCode:     String(p.project_code ?? code).trim(),
         projectName:     p.project_name,
         projectStatus:   p.project_status,
         innovationArea:  p.innovation_area,
@@ -86,7 +140,7 @@ searchProject() {
         attachmentsLink: p.attachments_link || '',
       }, { emitEvent: false });
 
-      ['projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment']
+      ['projectCode', 'projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment']
         .forEach(field => this.projectForm.get(field)!.disable({ emitEvent: false }));
 
         this.isSearching = false;
@@ -95,6 +149,7 @@ searchProject() {
       error: (err: any) => {
         this.isSearching = false;
         this.currentProjectId = null;
+        this.loadedProjectCodeLower = null;
         this.clearAutofilledFields();
         this.handleError(err);
       }
@@ -102,10 +157,15 @@ searchProject() {
   }
 
   clearAutofilledFields() {
-    ['projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment']
+    this.loadedProjectCodeLower = null;
+    this.loadedLookupSnapshotLower = null;
+    this.pendingPickSearchMode = null;
+    ['projectCode', 'projectName', 'projectStatus', 'innovationArea', 'region', 'marketSegment']
       .forEach(field => this.projectForm.get(field)!.enable({ emitEvent: false }));
 
     this.projectForm.patchValue({
+      projectCode:     '',
+      projectLookup:   '',
       projectName:     '',
       projectStatus:   '',
       innovationArea:  '',

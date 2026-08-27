@@ -1,0 +1,87 @@
+<div class="project-search-autocomplete">
+  <div class="search-mode-toggle" role="tablist" aria-label="Search mode">
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="searchMode === 'code'"
+      [class.active]="searchMode === 'code'"
+      (click)="setSearchMode('code')"
+    >Code</button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="searchMode === 'name'"
+      [class.active]="searchMode === 'name'"
+      (click)="setSearchMode('name')"
+    >Name</button>
+  </div>
+
+  <p class="field-hint">
+    Type at least 3 characters.
+    {{ searchMode === 'code' ? 'Code matches the start of the code.' : 'Name matches any part of the name.' }}
+    Not case-sensitive.
+  </p>
+
+  <div class="code-input-wrapper">
+    <div class="code-autocomplete">
+      <input
+        type="text"
+        [disabled]="disabled"
+        maxlength="256"
+        autocomplete="off"
+        spellcheck="false"
+        [placeholder]="searchMode === 'code' ? 'Enter project code…' : 'Enter project name…'"
+        [value]="query"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+      />
+      <div
+        class="code-suggestions-panel"
+        *ngIf="showSuggestions && queryTrim.length >= minChars"
+        (mousedown)="$event.preventDefault()"
+      >
+        <div class="code-suggestions-loading" *ngIf="isLoading">Loading suggestions…</div>
+        <ul class="code-suggestions" *ngIf="!isLoading && suggestions.length">
+          <li
+            *ngFor="let row of suggestions; trackBy: trackRow; let i = index"
+            class="code-suggestion"
+            [class.code-suggestion--name-mode]="searchMode === 'name'"
+            [class.code-suggestion--active]="i === activeIndex"
+            (mousedown)="selectRow(row, $event)"
+          >
+            <ng-container *ngIf="searchMode === 'code'; else namePrimary">
+              <span class="code-suggestion__code">{{ row.project_code }}</span>
+              <span class="code-suggestion__name" *ngIf="row.project_name">{{ row.project_name }}</span>
+            </ng-container>
+            <ng-template #namePrimary>
+              <span class="code-suggestion__title-name">{{ row.project_name }}</span>
+              <span class="code-suggestion__sub-code" *ngIf="row.project_code">{{ row.project_code }}</span>
+            </ng-template>
+          </li>
+        </ul>
+        <div class="code-suggestions-empty" *ngIf="!isLoading && loadError">
+          Could not load suggestions. Enter a value and press Search.
+        </div>
+        <div class="code-suggestions-empty" *ngIf="!isLoading && catalogReady && !suggestions.length && !loadError">
+          No projects match.
+        </div>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="search-btn"
+      [attr.aria-label]="'Search'"
+      (click)="onSearchClick()"
+      [disabled]="disabled || searchButtonBusy"
+    >
+      <svg *ngIf="!searchButtonBusy" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+        <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="search-btn__spinner" *ngIf="searchButtonBusy" aria-hidden="true"></span>
+    </button>
+  </div>
+</div>

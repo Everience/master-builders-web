@@ -17,6 +17,7 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   currentYear = new Date().getFullYear();
+  acc: any;
 
   constructor(
     private router: Router,
@@ -40,6 +41,8 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/home']);
       }
     });
+    
+    console.log(this.msalService.instance.getActiveAccount()?.idTokenClaims, this.acc.name);
   }
 
   login() {
