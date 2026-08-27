@@ -18,7 +18,7 @@ app.http("ChangeProjectStatus", {
       requireRole(user, "admin");
 
       const body = await request.json();
-      const { project_id, status, project_visibility } = body;
+      let { project_id, status, project_visibility } = body;
       status = status.toLowerCase();
       project_visibility = project_visibility.toLowerCase();
       //validazioni
