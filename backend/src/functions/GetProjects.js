@@ -39,7 +39,9 @@ app.http("GetProjects", {
         body: JSON.stringify({ projects: result.recordset }),
       });
     } catch (err) {
-      console.error("Function error:", err);
+      context.error("Function error:", err.message);
+      context.error("Error name:", err.name);
+      context.error("Full error:", JSON.stringify(err));
 
       if (
         err.message === "NO_AUTH_HEADER" ||
@@ -49,7 +51,10 @@ app.http("GetProjects", {
       ) {
         return withCors({
           status: 401,
-          body: JSON.stringify({ error: "Unauthorized" }),
+          body: JSON.stringify({
+            error: "Unauthorized",
+            detail: err.message,
+          }),
         });
       }
 

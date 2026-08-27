@@ -77,7 +77,7 @@ app.http("CreateUser", {
         .input("role", role).query(`
           INSERT INTO Users (email, user_name, department, role, user_status, user_id_internal)
           OUTPUT INSERTED.*
-          VALUES (@email, @user_name, @department, @role, 'Active', @user_id_internal)
+          VALUES (@email, @user_name, @department, @role, 'active', @user_id_internal)
         `);
 
       return withCors({

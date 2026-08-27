@@ -19,7 +19,13 @@ app.http("VoteProject", {
       const { project_id, score } = body;
       const score_reasoning = body.score_reasoning?.trim();
 
-      const user_email = user.preferred_username;
+      const user_email = user.upn;
+      if (!user_email) {
+        user_email = user.preferred_username;
+      }
+      context.log("upn", user.upn);
+      context.log("prefred", user.preferred_username);
+      context.log("user_email", user_email);
 
       // validazione input
       if (
@@ -72,7 +78,7 @@ app.http("VoteProject", {
           });
         }
 
-        if (project.recordset[0].project_visibility !== "Active") {
+        if (project.recordset[0].project_visibility !== "active") {
           await transaction.rollback();
           return withCors({
             status: 400,
@@ -88,7 +94,7 @@ app.http("VoteProject", {
           .query(
             `SELECT user_id_internal, user_status 
               FROM Users 
-              WHERE email = @user_email AND user_status = 'Active'`
+              WHERE email = @user_email AND user_status = 'active'`
           );
 
         if (userCheck.recordset.length === 0) {

@@ -3,8 +3,8 @@ const { getConnection } = require("../../db.js");
 const { handleCors, withCors } = require("../../cors.js");
 const withAuth = require("../auth/withAuth.js");
 const requireRole = require("../auth/requireRole.js");
-const allowedStatus = ["In Progress", "On Hold", "Completed", "Killed"];
-const allowedVisibility = ["Active", "Inactive"];
+const allowedStatus = ["in progress", "on hold", "completed", "killed"];
+const allowedVisibility = ["active", "inactive"];
 
 app.http("ChangeProjectStatus", {
   methods: ["POST", "OPTIONS"],

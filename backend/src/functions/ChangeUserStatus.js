@@ -27,7 +27,7 @@ app.http("ChangeUserStatus", {
         });
       }
 
-      if (!["Active", "Inactive"].includes(status)) {
+      if (!["active", "inactive"].includes(status)) {
         return withCors({
           status: 400,
           body: JSON.stringify({
@@ -63,13 +63,13 @@ app.http("ChangeUserStatus", {
 
       try {
         // Se si attiva un utente, disattivo gli altri con la stessa email
-        if (status === "Active") {
+        if (status === "active") {
           await transaction
             .request()
             .input("email", email)
             .input("user_id_internal", user_id_internal).query(`
               UPDATE Users
-              SET user_status = 'Inactive'
+              SET user_status = 'inactive'
               WHERE email = @email AND user_id_internal <> @user_id_internal
             `);
         }

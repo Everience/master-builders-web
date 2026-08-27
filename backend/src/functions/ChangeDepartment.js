@@ -74,7 +74,7 @@ app.http("ChangeUserDepartment", {
             FROM Users
             WHERE email = @email
               AND department = @new_department
-              AND user_status = 'Active'
+              AND user_status = 'active'
           `);
 
         if (activeInTarget.recordset.length > 0) {
@@ -90,7 +90,7 @@ app.http("ChangeUserDepartment", {
             FROM Users
             WHERE email = @email
               AND department = @new_department
-              AND user_status = 'Inactive'
+              AND user_status = 'inactive'
           `);
 
         const hasInactiveRecord = inactiveInTarget.recordset.length > 0;
@@ -101,7 +101,7 @@ app.http("ChangeUserDepartment", {
           .input("email", email)
           .input("department", department).query(`
             UPDATE Users
-            SET user_status = 'Inactive'
+            SET user_status = 'inactive'
             WHERE email = @email AND department = @department
           `);
 
@@ -114,7 +114,7 @@ app.http("ChangeUserDepartment", {
             .input("email", email)
             .input("new_department", new_department).query(`
               UPDATE Users
-              SET user_status = 'Active'
+              SET user_status = 'active'
               OUTPUT INSERTED.*
               WHERE email = @email AND department = @new_department
             `);
@@ -136,7 +136,7 @@ app.http("ChangeUserDepartment", {
             .input("new_department", new_department).query(`
               INSERT INTO Users (user_id_internal, email, user_name, department, user_status, role)
               OUTPUT INSERTED.*
-              VALUES (@new_user_id, @email, @user_name, @new_department, 'Active', @role)
+              VALUES (@new_user_id, @email, @user_name, @new_department, 'active', @role)
             `);
 
           resultRecord = insertResult.recordset[0];

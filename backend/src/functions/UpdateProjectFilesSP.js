@@ -138,7 +138,7 @@ app.http("UpdateProjectFilesSP", {
           .input("project_status", oldProject.project_status)
           .input("notes", notes)
           .input("attachments_link", oldProject.attachments_link)
-          .input("project_visibility", "Active")
+          .input("project_visibility", "active")
           .input("innovation_area", oldProject.innovation_area).query(`
             INSERT INTO Projects (
               project_id, project_name, project_code, region, market_segment,
