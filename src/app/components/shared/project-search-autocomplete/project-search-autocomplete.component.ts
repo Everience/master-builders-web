@@ -160,7 +160,10 @@ export class ProjectSearchAutocompleteComponent
     }
     this.isLoading = true;
     this.loadError = false;
-    this.catalog.getProjects().subscribe({
+    const source$ = this.filterVotableOnly
+      ? this.catalog.getVotableProjects()
+      : this.catalog.getProjects();
+      source$.subscribe({
       next: (rows) => {
         this.allRows = this.filterCatalogRows(rows || []);
         this.rebuildCodeDedupe(this.allRows);
