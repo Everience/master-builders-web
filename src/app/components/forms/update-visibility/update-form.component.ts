@@ -135,6 +135,8 @@ private visibilityFromApi(v: string | null | undefined): 'Active' | 'Inactive' {
     this.projectService.getProjectByCode(code).subscribe({
       next: (res) => {
         const p = res.project;
+        console.log('PROJECT FROM API:', p);
+        console.log('API STATUS:', p.project_status);
         this.currentProjectId = p.project_id;
         const display =
           this.pendingPickSearchMode === 'name'
@@ -144,7 +146,7 @@ private visibilityFromApi(v: string | null | undefined): 'Active' | 'Inactive' {
         this.loadedLookupSnapshotLower = display.toLowerCase();
         this.pendingPickSearchMode = null;
 
-        const st = p.project_status;
+        const st = this.statusFromApi(p.project_status);
         const rawVis = p.project_visibility;
         const vis =
           rawVis != null && String(rawVis).trim() !== ''
