@@ -67,13 +67,24 @@ export class UpdateFormComponent implements OnInit {
   }
 
   /** Map API / DB value (any casing) to form values used in requests. */
-  private visibilityFromApi(v: string | null | undefined): 'Active' | 'Inactive' {
-    return String(v ?? '')
-      .trim()
-      .toLowerCase() === 'inactive'
-      ? 'Inactive'
-      : 'Active';
-  }
+  private statusFromApi(v: string | null | undefined): string {
+  const normalized = String(v ?? '').trim().toLowerCase();
+
+  const match = this.projectStatuses.find(
+    status => status.toLowerCase() === normalized
+  );
+
+  return match ?? '';
+}
+
+/** Map API / DB value (any casing) to form values used in requests. */
+private visibilityFromApi(v: string | null | undefined): 'Active' | 'Inactive' {
+  return String(v ?? '')
+    .trim()
+    .toLowerCase() === 'inactive'
+    ? 'Inactive'
+    : 'Active';
+}
 
   private resetAfterProjectContextChange(): void {
     this.currentProjectId = null;
