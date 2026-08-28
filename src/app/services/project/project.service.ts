@@ -144,13 +144,11 @@ updateProject(payload: {
 
   getProjectsVotable(email: string): Observable<any> {
   return this.getAuthHeaders().pipe(
-    switchMap(headers => this.http.request('GET', `${this.baseUrl}/GetProjectsVotable`, {
+    switchMap(headers => this.http.get(`${this.baseUrl}/GetProjectsVotable`, {
       headers,
-      params: { code: this.key },
-      body: { email }
+      params: { code: this.key, email } 
     }))
   );
-
 }
 
 }
