@@ -13,17 +13,21 @@ export class ProjectCatalogService {
     shareReplay({ bufferSize: 1, refCount: false })
   );
 
-  private readonly votableProjects$ = this.projectService.getProjectsVotable().pipe(
-    map((res: any) => (Array.isArray(res) ? res : res?.projects) || []),
-    catchError(() => of<any[]>([])),
-    shareReplay({ bufferSize: 1, refCount: false })
-  );
+
+  private votableCache$: Observable<any[]> | null = null;
 
   getProjects(): Observable<any[]> {
     return this.projects$;
   }
 
-  getVotableProjects(): Observable<any[]> {
-    return this.votableProjects$;
+  getVotableProjects(email: string): Observable<any[]> {
+    if (!this.votableCache$) {
+      this.votableCache$ = this.projectService.getProjectsVotable(email).pipe(
+        map((res: any) => (Array.isArray(res) ? res : res?.projects) || []),
+        catchError(() => of<any[]>([])),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+    }
+    return this.votableCache$;
   }
 }
