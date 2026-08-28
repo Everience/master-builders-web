@@ -20,8 +20,8 @@ async function getUserIdInternal(pool, email) {
   return result.recordset[0];
 }
 
-app.http("GetProjects", {
-  methods: ["GET", "OPTIONS"],
+app.http("GetProjectsVotable", {
+  methods: ["POST", "OPTIONS"],
   authLevel: "anonymous",
   handler: async (request, context) => {
     // 👉 gestione preflight CORS
