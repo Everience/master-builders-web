@@ -13,7 +13,17 @@ export class ProjectCatalogService {
     shareReplay({ bufferSize: 1, refCount: false })
   );
 
+  private readonly votableProjects$ = this.projectService.getProjectsVotable().pipe(
+    map((res: any) => (Array.isArray(res) ? res : res?.projects) || []),
+    catchError(() => of<any[]>([])),
+    shareReplay({ bufferSize: 1, refCount: false })
+  );
+
   getProjects(): Observable<any[]> {
     return this.projects$;
+  }
+
+  getVotableProjects(): Observable<any[]> {
+    return this.votableProjects$;
   }
 }

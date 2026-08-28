@@ -142,4 +142,13 @@ updateProject(payload: {
     );
   }
 
+  getProjectsVotable(): Observable<any> {
+  return this.getAuthHeaders().pipe(
+    switchMap(headers => this.http.get(`${this.baseUrl}/GetProjectsVotable`, {
+      headers,
+      params: { code: this.key }
+    }))
+  );
+}
+
 }
