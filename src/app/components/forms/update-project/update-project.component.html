@@ -73,6 +73,8 @@
             New project phase
             <span class="editable-hint">Editable</span>
           </label>
+          <!--currente phase line
+          <span>Current phase: {{phase}}</span>-->
           <select formControlName="projectPhase">
             <option value="">Select phase</option>
             <option *ngFor="let phase of projectPhases" [value]="phase">{{ phase }}</option>

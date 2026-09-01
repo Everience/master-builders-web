@@ -42,6 +42,7 @@ export class UpdateFormComponent implements OnInit {
       projectLookup: [''],
       projectCode: ['', Validators.required],
       projectName: [''],
+      projectPhase: [''], 
       projectStatus: ['', Validators.required],
       projectVisibility: ['Active', Validators.required],
     });
@@ -97,6 +98,7 @@ private visibilityFromApi(v: string | null | undefined): 'Active' | 'Inactive' {
         projectStatus: '',
         projectVisibility: 'Active',
         projectName: '',
+        projectPhase: '',
         projectCode: '',
       },
       { emitEvent: false }
@@ -153,18 +155,19 @@ private visibilityFromApi(v: string | null | undefined): 'Active' | 'Inactive' {
             ? this.visibilityFromApi(rawVis)
             : this.defaultVisibilityForStatus(st);
         this.projectStatusForm.patchValue(
-          {
-            projectCode: String(p.project_code ?? code).trim(),
-            projectStatus: st,
-            projectVisibility: vis,
-            projectName: p.project_name ?? '',
-          },
+        {
+          projectCode: String(p.project_code ?? code).trim(),
+          projectPhase: p.project_phase ?? '',
+          projectStatus: st,
+          projectVisibility: vis,
+          projectName: p.project_name ?? '',
+        },
           { emitEvent: false }
         );
 
         this.projectStatusForm.get('projectCode')?.disable({ emitEvent: false });
         this.projectStatusForm.get('projectName')?.disable({ emitEvent: false });
-
+        this.projectStatusForm.get('projectPhase')?.disable({ emitEvent: false });
         this.isSearching = false;
         this.toast.info('Project found.');
       },

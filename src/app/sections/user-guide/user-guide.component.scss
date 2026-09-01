@@ -1,0 +1,231 @@
+/* Guide styles — reuse the create-project look.
+   Only guide-specific pieces are defined here; shared classes
+   (.form-page, .form-container, .page-title, .page-lead,
+   .section-heading, .back-btn, .file-chip) come from the
+   shared form styles used by create-project. */
+
+.guide-container {
+    max-width: 780px;
+}
+
+/* ── ROLE TABS ── */
+.guide-tabs {
+    display: flex;
+    gap: 4px;
+    margin: 20px 0 8px;
+    border-bottom: 2px solid #e0e4ec;
+    flex-wrap: wrap;
+}
+
+.guide-tab {
+    border: none;
+    background: transparent;
+    padding: 10px 18px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6b7a99;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 6px 6px 0 0;
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+
+    &:hover {
+        color: #004a96;
+        background: #eaf0f8;
+    }
+
+    &--active {
+        color: #004a96;
+        border-bottom-color: #004a96;
+    }
+}
+
+.guide-body {
+    padding-top: 8px;
+}
+
+/* ── TEXT + LISTS ── */
+.guide-text {
+    color: #3a4a68;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0 0 12px;
+}
+
+.guide-list {
+    margin: 4px 0 8px;
+    padding-left: 20px;
+
+    li {
+        color: #3a4a68;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 8px;
+    }
+
+    strong {
+        color: #1a2b48;
+    }
+}
+
+/* ── NUMBERED STEPS ── */
+.guide-steps {
+    list-style: none;
+    margin: 8px 0 16px;
+    padding: 0;
+
+    li {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 12px 0;
+        border-top: 1px solid #eef1f6;
+
+        &:first-child {
+            border-top: none;
+        }
+    }
+
+    p {
+        margin: 4px 0 0;
+        color: #6b7a99;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    strong {
+        color: #1a2b48;
+        font-size: 0.95rem;
+    }
+}
+
+.guide-step__num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #004a96;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    margin-top: 1px;
+}
+
+/* ── CALLOUT ── */
+.guide-callout {
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: #e8f4ee;
+    border-left: 4px solid #2ecc71;
+    color: #1a6b3c;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin: 12px 0 20px;
+
+    strong {
+        display: inline;
+        color: #14562f;
+    }
+
+    &--info {
+        background: #eaf0f8;
+        border-left-color: #004a96;
+        color: #234;
+
+        strong {
+            color: #003087;
+        }
+    }
+}
+
+/* ── STATUS vs VISIBILITY COMPARE ── */
+.guide-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 8px 0 16px;
+}
+
+.guide-compare__item {
+    padding: 14px 16px;
+    border: 1px solid #e0e4ec;
+    border-radius: 10px;
+    background: #fafbfd;
+
+    p {
+        margin: 6px 0 0;
+        color: #3a4a68;
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+}
+
+.guide-compare__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #004a96;
+}
+
+/* ── FAQ ── */
+.guide-faq {
+    border-bottom: 1px solid #eef1f6;
+}
+
+.guide-faq__q {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a2b48;
+
+    &:hover {
+        color: #004a96;
+    }
+}
+
+.guide-faq__arrow {
+    flex-shrink: 0;
+    color: #004a96;
+    transition: transform 0.2s;
+
+    &--open {
+        transform: rotate(180deg);
+    }
+}
+
+.guide-faq__a {
+    padding: 0 4px 14px;
+
+    p {
+        margin: 0;
+        color: #6b7a99;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 560px) {
+    .guide-compare {
+        grid-template-columns: 1fr;
+    }
+
+    .guide-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px 8px 12px;
+    }
+}

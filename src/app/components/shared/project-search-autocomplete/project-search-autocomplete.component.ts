@@ -113,7 +113,7 @@ export class ProjectSearchAutocompleteComponent
     if (!this.filterVotableOnly) return raw;
     return raw.filter(
       (p: any) =>
-        p.project_status.toLowerCase() === 'in progress' &&
+        //p.project_status.toLowerCase() === 'in progress' &&
         String(p.project_visibility || '').toLowerCase() === 'active'
     );
   }

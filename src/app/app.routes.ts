@@ -8,17 +8,35 @@ import { UpdateUserStatusFormComponent } from './components/forms/update-user-st
 import { LoginComponent } from './sections/login/login.component';
 import { UpdateProjectComponent } from './components/forms/update-project/update-project.component';
 import { authGuard } from './guards/auth.guard';
+import { UserGuideComponent } from './sections/user-guide/user-guide.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   //public route
   { path: 'login', component: LoginComponent },
   //protected routes
-  { path: 'home',                                component: HomeComponent,                  canActivate: [authGuard] },
-  { path: 'create-project',                      component: ProjectFormComponent,           canActivate: [authGuard] },
-  { path: 'update-project',                      component: UpdateProjectComponent,         canActivate: [authGuard] },
-  { path: 'update-project-visibility-and-status',component: UpdateFormComponent,            canActivate: [authGuard] },
-  { path: 'voting-form',                         component: VotingFormComponent,            canActivate: [authGuard] },
-  { path: 'update-user-status',                  component: UpdateUserStatusFormComponent,  canActivate: [authGuard] },
-  { path: 'bi-test',                             component: BiTestComponent,                canActivate: [authGuard] },
+  { path: 'home',                                
+    component: HomeComponent,                  
+    canActivate: [authGuard] },
+  { path: 'create-project',                      
+    component: ProjectFormComponent,           
+    canActivate: [authGuard] },
+  { path: 'update-project',                      
+    component: UpdateProjectComponent,         
+    canActivate: [authGuard] },
+  { path: 'update-project-visibility-and-status',
+    component: UpdateFormComponent,            
+    canActivate: [authGuard] },
+  { path: 'voting-form',                         
+    component: VotingFormComponent,            
+    canActivate: [authGuard] },
+  { path: 'update-user-status',                  
+    component: UpdateUserStatusFormComponent,  
+    canActivate: [authGuard] },
+  { path: 'bi-test',                             
+    component: BiTestComponent,                
+    canActivate: [authGuard] },
+  { path: 'user-guide',                          
+    component: UserGuideComponent,                
+    canActivate: [authGuard] },
 ];
