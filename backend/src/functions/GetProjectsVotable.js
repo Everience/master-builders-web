@@ -15,7 +15,7 @@ async function getUserIdInternal(pool, email) {
 
   if (result.recordset.length === 0) {
     return null;
-  }
+   }
 
   return result.recordset[0];
 }

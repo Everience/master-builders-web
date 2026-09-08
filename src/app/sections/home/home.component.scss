@@ -138,3 +138,40 @@ main {
     transform: translateY(0);
   }
 }
+
+.dashboard-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e4ec;
+  flex-wrap: wrap;
+}
+
+.dashboard-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #004a96;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #eaf0f8;
+  }
+
+  &__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  &__sep {
+    color: #c0c8d8;
+  }
+}

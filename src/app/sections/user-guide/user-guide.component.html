@@ -1,0 +1,175 @@
+<button class="back-btn" (click)="goBack()">Back to Home</button>
+<div class="form-page">
+    <div class="form-container guide-container">
+
+        <h2 class="page-title">Voting Tool — User Guide</h2>
+        <p class="page-lead">
+            Everything you need to find a project, cast a vote, and (for admins) manage projects and users.
+            Pick your role below to jump to the right section.
+        </p>
+
+        <!-- ROLE TABS -->
+        <div class="guide-tabs" role="tablist">
+            <button type="button" class="guide-tab" [class.guide-tab--active]="activeTab === 'voters'"
+                (click)="setTab('voters')" role="tab">For voters</button>
+            <button *ngIf="isAdmin" type="button" class="guide-tab" [class.guide-tab--active]="activeTab === 'admins'"
+                (click)="setTab('admins')" role="tab">For administrators</button>
+            <button type="button" class="guide-tab" [class.guide-tab--active]="activeTab === 'faq'"
+                (click)="setTab('faq')" role="tab">Help &amp; FAQ</button>
+        </div>
+
+        <!-- ============ VOTERS ============ -->
+        <div *ngIf="activeTab === 'voters'" class="guide-body">
+
+            <div class="section-heading">Before you start</div>
+            <ul class="guide-list">
+                <li>Sign in with your Microsoft account registered for the tool. There is no self sign-up.</li>
+                <li>Use a desktop browser for the best experience.</li>
+                <li>Have your score and a short written reason ready — the reason is required.</li>
+            </ul>
+
+            <div class="section-heading">How to vote on a project</div>
+            <ol class="guide-steps">
+                <li>
+                    <span class="guide-step__num">1</span>
+                    <div>
+                        <strong>Open “Voting R&amp;D Projects” from the home page.</strong>
+                        <p>You'll see a search box to find a project.</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="guide-step__num">2</span>
+                    <div>
+                        <strong>Search by project code or name.</strong>
+                        <p>Start typing and pick your project from the list. Only projects you can still vote on will
+                            appear.</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="guide-step__num">3</span>
+                    <div>
+                        <strong>Review the project details.</strong>
+                        <p>Check the name, phase and documents. These fields are read-only — if something's wrong, reset
+                            and ask an admin to fix the project.</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="guide-step__num">4</span>
+                    <div>
+                        <strong>Give a score from 1 to 5.</strong>
+                        <p>1 is low, 5 is high. Sales &amp; Marketing rate market potential; technical voters rate
+                            probability of success.</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="guide-step__num">5</span>
+                    <div>
+                        <strong>Write a short reason, then submit.</strong>
+                        <p>A green message confirms your vote was saved. You can then pick another project or go back
+                            home.</p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="guide-callout">
+                <strong>One vote per project.</strong>
+                Once you vote, that project drops off your list so you can't vote twice on the same record.
+            </div>
+
+            <div class="section-heading">Power BI reporting</div>
+            <ul class="guide-list">
+                <li>Open “Power BI Dashboard” from home to see voting results and trends.</li>
+                <li>Use filters to narrow the view; reset them before starting a new question.</li>
+                <li>Results refresh twice a day, so a fresh vote may not appear immediately.</li>
+            </ul>
+        </div>
+
+        <!-- ============ ADMINS ============ -->
+        <div *ngIf="activeTab === 'admins' && isAdmin" class="guide-body">
+
+            <div class="guide-callout guide-callout--info">
+                <strong>Golden rule.</strong>
+                Phase, status and visibility are three different things. Change only what you mean to change.
+            </div>
+
+            <div class="section-heading">Create a project</div>
+            <ol class="guide-steps">
+                <li><span class="guide-step__num">1</span>
+                    <div><strong>Open “Create Project”.</strong>
+                        <p>Fill in code, name, region, segment, innovation area, phase and status.</p>
+                    </div>
+                </li>
+                <li><span class="guide-step__num">2</span>
+                    <div><strong>Attach files if needed.</strong>
+                        <p>Use the file picker — don't paste a manual SharePoint link. The system builds the folder for
+                            you.</p>
+                    </div>
+                </li>
+                <li><span class="guide-step__num">3</span>
+                    <div><strong>Submit.</strong>
+                        <p>A new project is created. Set its visibility to Active when it's ready for voting.</p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="section-heading">Advance a project to a new phase</div>
+            <p class="guide-text">Use “Create New Project Phase” only when a project genuinely moves to a new phase.</p>
+            <ul class="guide-list">
+                <li>Search and select the project, then choose the new phase.</li>
+                <li>This creates a <strong>new</strong> project record and keeps the old one as history.</li>
+                <li>Votes do <strong>not</strong> carry over — tell voters the new phase is a fresh voting object.</li>
+            </ul>
+
+            <div class="section-heading">Update status &amp; visibility</div>
+            <div class="guide-compare">
+                <div class="guide-compare__item">
+                    <span class="guide-compare__label">Status</span>
+                    <p>Describes the project's business position (In Progress, On Hold, Completed, Killed). Does
+                        <em>not</em> control voting.</p>
+                </div>
+                <div class="guide-compare__item">
+                    <span class="guide-compare__label">Visibility</span>
+                    <p><strong>Active</strong> = offered to eligible voters. <strong>Inactive</strong> = hidden from
+                        voting.</p>
+                </div>
+            </div>
+
+            <div class="section-heading">Update a user</div>
+            <ul class="guide-list">
+                <li>Open “Update User Status” and search by email.</li>
+                <li>Confirm the department and status, then submit.</li>
+                <li>Changing a department keeps past votes intact by closing the old record and creating a new one.</li>
+                <li>You can't change another administrator's status here — use the official identity process.</li>
+            </ul>
+        </div>
+
+        <!-- ============ FAQ ============ -->
+        <div *ngIf="activeTab === 'faq'" class="guide-body">
+            <div class="section-heading">Common questions</div>
+
+            <div class="guide-faq" *ngFor="let item of faq; let i = index">
+                <button type="button" class="guide-faq__q" (click)="toggleFaq(i)">
+                    <span>{{ item.q }}</span>
+                    <span class="guide-faq__arrow" [class.guide-faq__arrow--open]="openFaq === i">▾</span>
+                </button>
+                <div class="guide-faq__a" *ngIf="openFaq === i">
+                    <p>{{ item.a }}</p>
+                </div>
+            </div>
+
+            <div class="section-heading">Need more help?</div>
+            <p class="guide-text">
+                Contact your Master Builders Solutions platform administrator first. When reporting an issue, include
+                your role,
+                the project code, what you did, the time, and the exact message you saw.
+            </p>
+
+            <a class="file-chip" href="https://netecoorg.sharepoint.com/sites/MBsBlobTest" target="_blank"
+                rel="noopener noreferrer">
+                <img src="../../../../assets/icons/folder (2).png" alt="" class="file-chip__img" />
+                <span>Open SharePoint documents</span>
+            </a>
+        </div>
+
+    </div>
+</div>

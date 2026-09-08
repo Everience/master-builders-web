@@ -107,6 +107,12 @@ export class UpdateProjectComponent implements OnInit {
     this.searchProject();
   }
 
+  //helper to normalize cases
+  private matchOption(value: string, options: string[]): string {
+    const v = String(value ?? '').trim().toLowerCase();
+    return options.find(o => o.toLowerCase() === v) ?? '';
+  }
+
 searchProject() {
   const code = this.projectForm.get('projectCode')?.value?.trim();
   if (!code) return;
@@ -131,12 +137,12 @@ searchProject() {
       this.projectForm.patchValue({
         projectCode:     String(p.project_code ?? code).trim(),
         projectName:     p.project_name,
-        projectStatus:   p.project_status,
-        innovationArea:  p.innovation_area,
+        projectStatus:   this.matchOption(p.project_status, this.projectStatuses),
+        innovationArea:  this.matchOption(p.innovation_area, this.innovationAreas),
         region:          p.region,
         marketSegment:   p.market_segment,
         notes:           p.notes,
-        projectPhase:    p.project_phase,
+        projectPhase:    this.matchOption(p.project_phase, this.projectPhases), 
         attachmentsLink: p.attachments_link || '',
       }, { emitEvent: false });
 

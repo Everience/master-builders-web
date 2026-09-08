@@ -42,6 +42,7 @@ export class UpdateFormComponent implements OnInit {
       projectLookup: [''],
       projectCode: ['', Validators.required],
       projectName: [''],
+      projectPhase: [''], 
       projectStatus: ['', Validators.required],
       projectVisibility: ['Active', Validators.required],
     });
@@ -67,13 +68,24 @@ export class UpdateFormComponent implements OnInit {
   }
 
   /** Map API / DB value (any casing) to form values used in requests. */
-  private visibilityFromApi(v: string | null | undefined): 'Active' | 'Inactive' {
-    return String(v ?? '')
-      .trim()
-      .toLowerCase() === 'inactive'
-      ? 'Inactive'
-      : 'Active';
-  }
+  private statusFromApi(v: string | null | undefined): string {
+  const normalized = String(v ?? '').trim().toLowerCase();
+
+  const match = this.projectStatuses.find(
+    status => status.toLowerCase() === normalized
+  );
+
+  return match ?? '';
+}
+
+/** Map API / DB value (any casing) to form values used in requests. */
+private visibilityFromApi(v: string | null | undefined): 'Active' | 'Inactive' {
+  return String(v ?? '')
+    .trim()
+    .toLowerCase() === 'inactive'
+    ? 'Inactive'
+    : 'Active';
+}
 
   private resetAfterProjectContextChange(): void {
     this.currentProjectId = null;
@@ -86,6 +98,7 @@ export class UpdateFormComponent implements OnInit {
         projectStatus: '',
         projectVisibility: 'Active',
         projectName: '',
+        projectPhase: '',
         projectCode: '',
       },
       { emitEvent: false }
@@ -124,6 +137,8 @@ export class UpdateFormComponent implements OnInit {
     this.projectService.getProjectByCode(code).subscribe({
       next: (res) => {
         const p = res.project;
+        console.log('PROJECT FROM API:', p);
+        console.log('API STATUS:', p.project_status);
         this.currentProjectId = p.project_id;
         const display =
           this.pendingPickSearchMode === 'name'
@@ -133,25 +148,26 @@ export class UpdateFormComponent implements OnInit {
         this.loadedLookupSnapshotLower = display.toLowerCase();
         this.pendingPickSearchMode = null;
 
-        const st = p.project_status;
+        const st = this.statusFromApi(p.project_status);
         const rawVis = p.project_visibility;
         const vis =
           rawVis != null && String(rawVis).trim() !== ''
             ? this.visibilityFromApi(rawVis)
             : this.defaultVisibilityForStatus(st);
         this.projectStatusForm.patchValue(
-          {
-            projectCode: String(p.project_code ?? code).trim(),
-            projectStatus: st,
-            projectVisibility: vis,
-            projectName: p.project_name ?? '',
-          },
+        {
+          projectCode: String(p.project_code ?? code).trim(),
+          projectPhase: p.project_phase ?? '',
+          projectStatus: st,
+          projectVisibility: vis,
+          projectName: p.project_name ?? '',
+        },
           { emitEvent: false }
         );
 
         this.projectStatusForm.get('projectCode')?.disable({ emitEvent: false });
         this.projectStatusForm.get('projectName')?.disable({ emitEvent: false });
-
+        this.projectStatusForm.get('projectPhase')?.disable({ emitEvent: false });
         this.isSearching = false;
         this.toast.info('Project found.');
       },

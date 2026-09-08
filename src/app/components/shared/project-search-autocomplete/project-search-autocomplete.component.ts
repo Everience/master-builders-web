@@ -10,6 +10,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ProjectCatalogService } from '../../../services/project/project-catalog.service';
 import { ToastService } from '../../../services/project/toast.service';
+import { MsalService } from '@azure/msal-angular';
 
 export type ProjectSearchMode = 'code' | 'name';
 
@@ -65,7 +66,8 @@ export class ProjectSearchAutocompleteComponent
 
   constructor(
     private catalog: ProjectCatalogService,
-    private toast: ToastService
+    private toast: ToastService,
+    private msalService: MsalService
   ) {}
 
   get queryTrim(): string {
@@ -111,7 +113,7 @@ export class ProjectSearchAutocompleteComponent
     if (!this.filterVotableOnly) return raw;
     return raw.filter(
       (p: any) =>
-        p.project_status.toLowerCase() === 'in progress' &&
+        //p.project_status.toLowerCase() === 'in progress' &&
         String(p.project_visibility || '').toLowerCase() === 'active'
     );
   }
@@ -160,10 +162,11 @@ export class ProjectSearchAutocompleteComponent
     }
     this.isLoading = true;
     this.loadError = false;
+    const email = this.msalService.instance.getActiveAccount()?.username ?? '';
     const source$ = this.filterVotableOnly
-      ? this.catalog.getVotableProjects()
+      ? this.catalog.getVotableProjects(email)
       : this.catalog.getProjects();
-      source$.subscribe({
+    source$.subscribe({
       next: (rows) => {
         this.allRows = this.filterCatalogRows(rows || []);
         this.rebuildCodeDedupe(this.allRows);

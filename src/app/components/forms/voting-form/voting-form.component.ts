@@ -59,6 +59,7 @@ export class VotingFormComponent implements OnInit {
       projectName: [''],
       projectCode: [''],
       projectStatus: [''],
+      projectPhase: [''],  
       innovationArea: [''],
       region: [''],
       marketSegment: [''],
@@ -96,6 +97,7 @@ export class VotingFormComponent implements OnInit {
         projectName: String(p.project_name ?? '').trim(),
         projectCode: String(p.project_code ?? '').trim(),
         projectStatus: p.project_status,
+        projectPhase: p.project_phase, 
         innovationArea: p.innovation_area,
         region: p.region,
         marketSegment: p.market_segment,
@@ -104,7 +106,7 @@ export class VotingFormComponent implements OnInit {
       { emitEvent: false }
     );
 
-    ['projectName', 'projectCode', 'projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes'].forEach(
+    ['projectName', 'projectCode', 'projectStatus',  'projectPhase', 'innovationArea', 'region', 'marketSegment', 'notes'].forEach(
       (field) => this.votingForm.get(field)!.disable({ emitEvent: false })
     );
   }
@@ -121,13 +123,14 @@ export class VotingFormComponent implements OnInit {
   }
 
   clearProjectFields() {
-    ['projectName', 'projectCode', 'projectStatus', 'innovationArea', 'region', 'marketSegment', 'notes'].forEach(
+    ['projectName', 'projectCode', 'projectStatus', 'projectPhase', 'innovationArea', 'region', 'marketSegment', 'notes'].forEach(
       (field) => this.votingForm.get(field)!.enable({ emitEvent: false })
     );
 
     this.votingForm.patchValue(
       {
         projectStatus: '',
+        projectPhase: '',
         innovationArea: '',
         region: '',
         marketSegment: '',
