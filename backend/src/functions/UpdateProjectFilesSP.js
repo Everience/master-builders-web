@@ -33,7 +33,10 @@ app.http("UpdateProjectFilesSP", {
       // Autenticazione
       const user = await withAuth(req, context);
       requireRole(user, "admin");
-      const user_email = user.preferred_username;
+      const user_email = user.upn;
+      if (!user_email) {
+        user_email = user.preferred_username;
+      }
 
       // Parsing multipart/form-data
       const bb = busboy({ headers: Object.fromEntries(req.headers) });

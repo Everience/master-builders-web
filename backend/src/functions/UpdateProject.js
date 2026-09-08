@@ -108,7 +108,7 @@ app.http("UpdateProject", {
           .input("project_code", cleaned.project_code)
           .input("region", cleaned.region)
           .input("market_segment", cleaned.market_segment)
-          .input("project_phase", cleaned.project_phase)
+          .input("project_phase", cleaned.project_phase.toLowerCase())
           .input("project_status", cleaned.project_status)
           .input("notes", cleaned.notes)
           .input("attachments_link", cleaned.attachments_link)
@@ -180,6 +180,18 @@ app.http("UpdateProject", {
           status: 401,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ success: false, error: "Unauthorized" }),
+        });
+      }
+
+      if (err?.number === 2601 || err?.number === 2627) {
+        return withCors({
+          status: 409,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            success: false,
+            error:
+              "The record already exists. A duplicate phase was found for this project.",
+          }),
         });
       }
 

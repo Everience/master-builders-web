@@ -43,7 +43,10 @@ app.http("CreateProjectFiles", {
     try {
       const user = await withAuth(req, context);
       requireRole(user, "admin");
-      const user_email = user.preferred_username;
+      const user_email = user.upn;
+      if (!user_email) {
+        user_email = user.preferred_username;
+      }
       const pool = await getConnection();
       const transaction = pool.transaction();
       await transaction.begin();
