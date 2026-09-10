@@ -1,17 +1,19 @@
 main {
   padding: 48px 40px;
-}
+  position: relative;
+  min-height: 100vh;
 
-.section-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 24px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  // faint blurred background — sits behind everything
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: url('../../../assets/InnoCompass_home.png') center / cover no-repeat;
+    filter: blur(3px) saturate(2);
+    opacity: 0.18;
+    transform: scale(1.05); // hides blurred edges
+  }
 }
 
 .cards {
@@ -36,9 +38,14 @@ main {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   box-shadow: var(--shadow-sm);
   animation: fadeUp 0.5s ease both;
+
+  // slight backdrop so cards read cleanly over the texture
+  backdrop-filter: blur(2px);
+
   @media screen and (max-width: 900px) {
     width: 80%;
   }
+
   @media screen and (min-width: 901px) {
     width: 45%;
   }
@@ -144,7 +151,7 @@ main {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-top: 32px;
+  margin-top: 40px;
   padding-top: 24px;
   border-top: 1px solid #e0e4ec;
   flex-wrap: wrap;
