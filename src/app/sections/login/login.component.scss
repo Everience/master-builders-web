@@ -51,15 +51,27 @@ $error: #c0392b;
     text-decoration: none;
 }
 
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 24px 40px;
+main {
+    padding: 48px 40px;
     position: relative;
-    z-index: 1;
+    flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+
+    // faint blurred background — sits behind everything
+    &::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background: url('../../../assets/InnoCompass_home.png') center / cover no-repeat;
+        filter: blur(3px) saturate(2);
+        opacity: 0.18;
+        transform: scale(1.05); // hides blurred edges
+    }
 }
 
 .login-card {
@@ -79,7 +91,7 @@ $error: #c0392b;
 
     &__inner {
         flex: 1;
-        padding: 40px 36px 32px;
+        padding: 60px 36px;
         display: flex;
         flex-direction: column;
         gap: 28px;
@@ -185,6 +197,7 @@ $error: #c0392b;
     cursor: pointer;
     transition: background-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
     box-shadow: 0 2px 8px rgba($navy-dark, 0.25);
+    margin: 15px 0;
 
     &__logo {
         display: flex;
