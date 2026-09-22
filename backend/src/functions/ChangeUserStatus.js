@@ -27,7 +27,7 @@ app.http("ChangeUserStatus", {
         });
       }
 
-      if (!["active", "inactive"].includes(status)) {
+      if (!["active", "inactive"].includes(status.toLowerCase())) {
         return withCors({
           status: 400,
           body: JSON.stringify({
