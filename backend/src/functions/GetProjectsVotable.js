@@ -21,7 +21,7 @@ async function getUserIdInternal(pool, email) {
 }
 
 app.http("GetProjectsVotable", {
-  methods: ["POST", "OPTIONS"],
+  methods: ["GET", "OPTIONS"],
   authLevel: "anonymous",
   handler: async (request, context) => {
     // 👉 gestione preflight CORS
@@ -32,13 +32,22 @@ app.http("GetProjectsVotable", {
       const user = await withAuth(request, context);
       requireRole(user, "admin", "user");
 
-      const body = await request.json();
-      const email = body.email;
+      const email = request.query.get("email");
 
       const pool = await getConnection();
-      const userIdInternal = getUserIdInternal(pool, email);
 
-      if (!userIdInternal) {
+      context.log(email, pool, "ciao");
+
+      const resultId = await getUserIdInternal(pool, email);
+      const userIdInternal = resultId.user_id_internal;
+
+      context.log(userIdInternal);
+      context.log({
+        userIdInternal,
+        type: typeof userIdInternal,
+      });
+
+      if (userIdInternal == null) {
         return withCors({
           status: 404,
           body: JSON.stringify({

@@ -33,8 +33,11 @@ app.http("CreateProjectFilesSP", {
     try {
       const user = await withAuth(req, context);
       requireRole(user, "admin");
-      const user_email = user.preferred_username;
 
+      const user_email = user.upn;
+      if (!user_email) {
+        user_email = user.preferred_username;
+      }
       const pool = await getConnection();
       const transaction = pool.transaction();
       await transaction.begin();
@@ -118,7 +121,7 @@ app.http("CreateProjectFilesSP", {
         .input("region", cleaned.region)
         .input("market_segment", cleaned.market_segment)
         .input("project_phase", cleaned.project_phase)
-        .input("project_status", cleaned.project_status)
+        .input("project_status", cleaned.project_status.toLowerCase())
         .input("notes", cleaned.notes)
         .input("attachments_link", cleaned.attachments_link)
         .input("project_visibility", "active")
