@@ -6,7 +6,7 @@ import { UserService } from '../../../services/project/user.service';
 import { ToastService } from '../../../services/project/toast.service';
 
 type Mode = 'manage' | 'create';
-type Status = 'Active' | 'Inactive';
+type Status = 'active' | 'inactive';
 type CellState = 'active' | 'inactive' | 'none';
 
 interface UserRecord {
@@ -336,19 +336,19 @@ export class UpdateUserStatusFormComponent implements OnInit {
 
   activate(cell: DeptCell): void {
     if (!cell.record) return;
-    this.setStatus(cell, 'Active');
+    this.setStatus(cell, 'active');
   }
 
   deactivate(cell: DeptCell): void {
     if (!cell.record) return;
-    this.setStatus(cell, 'Inactive');
+    this.setStatus(cell, 'inactive');
   }
 
   private setStatus(cell: DeptCell, status: Status): void {
     if (this.busyDept) return;
     const rec = cell.record;
     if (!rec) return;
-    if ((this.isActive(rec) && status === 'Active') || (!this.isActive(rec) && status === 'Inactive')) {
+    if ((this.isActive(rec) && status === 'active') || (!this.isActive(rec) && status === 'inactive')) {
       return;
     }
 
@@ -359,7 +359,7 @@ export class UpdateUserStatusFormComponent implements OnInit {
       .changeUserStatus({ email: rec.email, department: rec.department, status })
       .subscribe({
         next: () => {
-          if (status === 'Active' && previousActive && previousActive.department !== rec.department) {
+          if (status === 'active' && previousActive && previousActive.department !== rec.department) {
             this.toast.info(`${previousActive.department} was deactivated to keep one active department.`);
           }
           this.toast.success(`${rec.department} set to ${status}.`);

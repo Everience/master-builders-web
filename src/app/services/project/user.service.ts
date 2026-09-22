@@ -37,7 +37,7 @@ export class UserService {
   changeUserStatus(payload: {
     email: string;
     department: string;
-    status: 'Active' | 'Inactive';
+    status: 'active' | 'inactive';
   }): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.put(  // ✅ PUT not POST
