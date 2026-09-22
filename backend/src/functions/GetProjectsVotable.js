@@ -15,7 +15,7 @@ async function getUserIdInternal(pool, email) {
 
   if (result.recordset.length === 0) {
     return null;
-   }
+  }
 
   return result.recordset[0];
 }
@@ -39,6 +39,16 @@ app.http("GetProjectsVotable", {
       context.log(email, pool, "ciao");
 
       const resultId = await getUserIdInternal(pool, email);
+
+      if (!resultId) {
+        return withCors({
+          status: 404,
+          body: JSON.stringify({
+            error: "User not found or inactive",
+          }),
+        });
+      }
+
       const userIdInternal = resultId.user_id_internal;
 
       context.log(userIdInternal);
