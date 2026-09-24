@@ -10,9 +10,9 @@ main {
     inset: 0;
     z-index: -1;
     background: url('../../../assets/InnoCompass_home.png') center / cover no-repeat;
-    filter: blur(3px) saturate(2);
-    opacity: 0.18;
-    transform: scale(1.05); // hides blurred edges
+    filter: blur(1px) saturate(2);
+    opacity: 0.50;
+    transform: scale(1.05);
   }
 }
 
